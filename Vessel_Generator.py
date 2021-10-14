@@ -45,13 +45,13 @@ def main():
     print(writeBifurcation(currentNode))
     """ L-system definition """
     # Rules definition
-    ruleA = [rule('fw', 0.99), rule('bif', 0.01)]
+    ruleA = [rule('fw', 0.8), rule('bif', 0.2)]
     ruleB = [rule('fw', 0.33), rule('bif', 0.33), rule('end', 0.34)]
     ruleC = [rule('fw', 0.33), rule('bif', 0.33), rule('end', 0.34)]
     # Ruleset definition
     ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC}
     # Lsystem definition (initial state, ruleset)
-    ls = Lsystem('A', ruleset,alphabet)
+    ls = Lsystem([['A',1,1]], ruleset,alphabet)
     instructionList=[]
     instructionList.append(['A',1,1])
     instructionList.pop()

@@ -27,7 +27,7 @@ import random
 import math
 
 class Lsystem:
-    def __init__(self, axiom='', ruleset={},alphabet=''):
+    def __init__(self, axiom=[], ruleset={},alphabet=''):
         self.axiom = axiom
         self.ruleset = ruleset
         self.generation = 0
@@ -35,13 +35,13 @@ class Lsystem:
 
     def process(self, original_string):
         #  process a string with ruleset and return next gen string
-        tranformed_string = ""
+        tranformed_string = []
         for letter in original_string:
-            if letter in self.alphabet:
-                currentNode=node(letter,1,1)
-                tranformed_string = tranformed_string + ruleOutput(currentNode,self.ruleset[letter])
+            if letter[0] in self.alphabet:
+                currentNode=node(letter[0],letter[1],letter[2])
+                tranformed_string.extend(ruleOutput(currentNode,self.ruleset[letter[0]]))
             else:
-                tranformed_string = tranformed_string + letter
+                tranformed_string.append(letter)
         self.generation += 1
         return tranformed_string
 
@@ -65,16 +65,18 @@ class rule:
             return
 
     def evaluate(self,node):
+        rulevalues=[]
         if self.ruleType == 'fw':
-            strForw='f'+node.getNodeParam()
+            rulevalues.append(['f',node.diam,node.len])
             if random.random()<0.5:
                 node.diam=node.diam*0.9
                 node.len=node.len*0.9
-            return strForw+node.vessKind+node.getNodeParam()
+            rulevalues.append([node.vessKind,node.diam,node.len])
+            return rulevalues
         elif self.ruleType == 'bif':
             return writeBifurcation(node)
         elif self.ruleType == 'end':
-            rulevalues='E'
+            rulevalues.append('E')
         return rulevalues
 
 
@@ -103,9 +105,16 @@ class node:
     def getNodeParam(self):
         return '('+str(self.diam)+','+str(self.len)+')'
 def writeBifurcation(node):
-    ruleString = 'f'+node.getNodeParam()
+    ruleString = []
+    ruleString.append(['f',node.diam,node.len])
     params=calculateBifurcation(node.diam,node.len)
-    ruleString=ruleString+'['+'+('+str(params['th1'])+')'+node.vessKind+'('+str(params['d1'])+')]'+'-('+str(params['th2'])+')'+node.vessKind+'('+str(params['d1'])+')]'
+    ruleString.append('[')
+    ruleString.append(['+',params['th1']])
+    ruleString.append([node.vessKind,params['d1'],params['l1']])
+    ruleString.append(']')
+    ruleString.append(['-',params['th2']])
+    ruleString.append([node.vessKind,params['d2'],params['l2']])
+    ruleString.append(']')
     return ruleString
 
 def calculateBifurcation(d0,l0,alpha=1):
