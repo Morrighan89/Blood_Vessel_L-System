@@ -54,7 +54,7 @@ def main():
     # Lsystem definition (initial state, ruleset)
     ls = Lsystem([['A',1,1]], ruleset,alphabet)
     # generate the string of turtle instructions
-    instruction_string = ls.processGen(30)
+    instruction_string = ls.processGen(15)
     #print("Drawing the following L-system :\n",instruction_string)
     VesselInterpreter.createPolyline(instruction_string)
 

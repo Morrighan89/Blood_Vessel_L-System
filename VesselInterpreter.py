@@ -42,6 +42,7 @@ def createPolyline(Instructions=[]):
     if len(Instructions)==0:
         raise Exception("Instruction list is empty")
     else:
+        print('Initializing drawing process')
         pos=[]
         diam=[]
         lines=[]
@@ -52,8 +53,6 @@ def createPolyline(Instructions=[]):
         newline=[]
         newline.append(0)
         poly=pv.PolyData()  
-        index1=0
-        index2=0
         for instruction in Instructions:
             if instruction[0]=='f':
                 t.move(instruction[2])
@@ -69,13 +68,8 @@ def createPolyline(Instructions=[]):
             elif instruction[0]=='/':
                 t.turn(ph=-instruction[1])
             elif instruction[0]=='[':
-                index1=index1+1
-                print(index1, "number of save pos")
                 pos.append([t.savePos(),points.__len__()-1])
             elif instruction[0]==']':
-                index2=index2+1
-                print(index2, "number of goback")
-
                 t.goBack(pos[-1][0][0],pos[-1][0][1],pos[-1][0][2],pos[-1][0][3])
                 lines.append(copy.deepcopy(newline))
                 newline.clear()
@@ -89,7 +83,6 @@ def createPolyline(Instructions=[]):
         # Create a cell array to store the lines
         cells = vtkCellArray()
         for i in range (0,len(lines)):
-            print(len(lines[i]))
             if len(lines[i])>1:
                 polyLine = vtkPolyLine()
                 polyLine.GetPointIds().SetNumberOfIds(len(lines[i]))          
@@ -192,39 +185,3 @@ def quatMul(q1,q2):
     return np.array([w, x, y, z])
       
 
-def main():
-    from vtkmodules.vtkCommonCore import vtkPoints
-    from vtkmodules.vtkCommonDataModel import (
-    vtkCellArray,
-    vtkPolyData,
-    vtkPolyLine
-    )
-    #import math
-    #q1=quatRot()
-    #a=math.sqrt(2)
-    #q2=quatRot(np.array([-math.cos(np.pi/4),0,math.sin(np.pi/4),0]))
-    #q3=quatRot.angleAxes(np.pi/4,np.array([0,0,1]))       
-    #q4=quatRot(quatMul(q3.quat,q2.quat))
-    ##print(q1,q2,q3,q4)
-    #vect=q3.rotate(np.array([1,0,0]))
-    #print(vect)
-    v = np.array([[0, 0, 0],
-                     [1, 0, 0],
-                     [1, 1, 0],
-                     [0, 1, 0],
-                     [0.5, 0.5, -1]])
-    # mesh faces
-    #vertices=np.concatenate((v,v*2))
-    #poly = pv.PolyData()
-    #poly.points = vertices
-    #cells = np.full((len(v)-1, 3), 2, dtype=np.int_)
-    #cells[:, 1] = np.arange(0, len(v)-1, dtype=np.int_)
-    #cells[:, 2] = np.arange(1, len(v), dtype=np.int_)
-    #poly.lines = cells
-    #tube = poly.tube(radius=0.1)
-    #tube.plot(smooth_shading=True)
-    points=vtkPoints()
-    points.InsertPoints(v)
-    print('end')
-if __name__=='__main__':
-    main()
