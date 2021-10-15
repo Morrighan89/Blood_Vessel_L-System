@@ -25,6 +25,7 @@ SOFTWARE.
 import random
 import math
 from Lsystem_class import *
+import VesselInterpreter
 
 
 def main():
@@ -52,15 +53,10 @@ def main():
     ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC}
     # Lsystem definition (initial state, ruleset)
     ls = Lsystem([['A',1,1]], ruleset,alphabet)
-    instructionList=[]
-    instructionList.append(['A',1,1])
-    instructionList.pop()
-    instructionList.append(['F',1,1])
-    instructionList.append(['A',1,1])
-    print(instructionList[:][0])
     # generate the string of turtle instructions
-    instruction_string = ls.processGen(6)
-    print("Drawing the following L-system :\n",instruction_string)
+    instruction_string = ls.processGen(30)
+    #print("Drawing the following L-system :\n",instruction_string)
+    VesselInterpreter.createPolyline(instruction_string)
 
 
 if __name__=='__main__':

@@ -68,9 +68,9 @@ class rule:
         rulevalues=[]
         if self.ruleType == 'fw':
             rulevalues.append(['f',node.diam,node.len])
-            if random.random()<0.5:
-                node.diam=node.diam*0.9
-                node.len=node.len*0.9
+            #if random.random()<0.001:
+            #    node.diam=node.diam*0.9
+            #    node.len=node.len*0.9
             rulevalues.append([node.vessKind,node.diam,node.len])
             return rulevalues
         elif self.ruleType == 'bif':
@@ -107,11 +107,12 @@ class node:
 def writeBifurcation(node):
     ruleString = []
     ruleString.append(['f',node.diam,node.len])
-    params=calculateBifurcation(node.diam,node.len)
+    params=calculateBifurcation(node.diam,node.len,random.random())
     ruleString.append('[')
     ruleString.append(['+',params['th1']])
     ruleString.append([node.vessKind,params['d1'],params['l1']])
     ruleString.append(']')
+    ruleString.append('[')
     ruleString.append(['-',params['th2']])
     ruleString.append([node.vessKind,params['d2'],params['l2']])
     ruleString.append(']')
