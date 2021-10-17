@@ -116,14 +116,28 @@ class node:
         return '('+str(self.diam)+','+str(self.len)+')'
 def writeBifurcation(node):
     ruleString = []
+    turning=random.random()
+    angle=random.uniform(0,np.pi/2)
     ruleString.append(['f',node.diam,node.len])
     params=calculateBifurcation(node.vessKind,node.diam,node.len,random.uniform(0.1,1))
     ruleString.append('[')
+    if turning<0.3:
+        ruleString.append(['*',angle])
+    elif turning<0.6:
+        ruleString.append(['/',angle])
+    else:
+        None
     ruleString.append(['+',params['th1']])
     node.vessKind=vesselKindEvaluation(params['d1'])
     ruleString.append([node.vessKind,params['d1'],params['l1']])
     ruleString.append(']')
     ruleString.append('[')
+    if turning<0.3:
+        ruleString.append(['*',angle])
+    elif turning<0.6:
+        ruleString.append(['/',angle])
+    else:
+        None
     ruleString.append(['-',params['th2']])
     node.vessKind=vesselKindEvaluation(params['d2'])
     ruleString.append([node.vessKind,params['d2'],params['l2']])

@@ -30,6 +30,7 @@ import numpy as np
 import math
 import copy
 from tqdm import tqdm
+from vtkmodules.vtkIOXML import vtkXMLPolyDataWriter
 import vtkmodules.numpy_interface as np2vtk
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
@@ -48,9 +49,10 @@ def createPolyline(Instructions=[]):
         pos=[]
         diam=[]
         lines=[]
+        lines.append([0,1])
         points=[]
         t=my3Dturtle()
-        pos.append([t.savePos(),0])
+        pos.append([t.savePos(),0,0])
         points.append(t.storePoint())
         newline=[]
         newline.append(0)
@@ -71,22 +73,28 @@ def createPolyline(Instructions=[]):
             elif instruction[0]=='/':
                 t.turn(ph=-instruction[1])
             elif instruction[0]=='[':
-                pos.append([t.savePos(),points.__len__()-1])
+                pos.append([t.savePos(),points.__len__()-1,copy.deepcopy(newline)])
             elif instruction[0]==']':
                 t.goBack(pos[-1][0][0],pos[-1][0][1],pos[-1][0][2],pos[-1][0][3])
-                lines.append(copy.deepcopy(newline))
-                newline.clear()
-                newline.append(pos[-1][1])
+                if newline[-1] is not lines[-1][-1]:
+                    lines.append(copy.deepcopy(newline))
+                newline=pos[-1][2]
+                #newline.clear()
+                #newline.append(pos[-1][1])
                 pos.pop()
             else:
                 pass
         lines.append(newline)
-        ppoints=np.stack(points)
+        ppoints=np.stack(points) #stacks converts the array of arrays in a 2D array for the vtk_points function
         vtkPoints=vtk_points(ppoints)
         # Create a cell array to store the lines
         cells = vtkCellArray()
-        for i in range (0,len(lines)):
-            if len(lines[i])>1:
+        endPoints=[]
+        endPoints.append(-1)           
+        print("Cleaning repeated lines")
+        for i in  tqdm(range(1,len(lines))):
+            if lines[i][-1] not in endPoints:
+                endPoints.extend(lines[i])
                 polyLine = vtkPolyLine()
                 polyLine.GetPointIds().SetNumberOfIds(len(lines[i]))          
                 for j in range(0, len(lines[i])):
@@ -105,12 +113,22 @@ def createPolyline(Instructions=[]):
         #Create data in vtk
         #VTK_data = np2vtk.numpy_to_vtk(num_array=NumPy_data.ravel(), deep=True, array_type=vtk.VTK_FLOAT)
         #polyData.GetPointData().SetScalars(VTK_data)
+        """ potentially useful code snippets"""
+        #velParam_numpy = 2*velArray 
+        #velParam_vtk = numpy_to_vtk(velParam_numpy)
+        #velParam_vtk.SetName('VelParam') #rememebr to give an unique name
+        #data.GetPointData().AddArray(velParam_vtk) 
+        writer = vtkXMLPolyDataWriter()
+        writer.SetFileName("vtkVessel.vtp")
+        writer.SetInputData(polyData)
+        writer.Write()
         pvData=pv.PolyData(polyData)
         ## Add data in pyvista
         pvData.point_data["radius"]=np.array(diam)
         tube = pvData.tube(radius=0.01,scalars="radius")
         tube.plot(smooth_shading=True)
         tube.save("vessels.vtp")
+        pvData.save("vessCenter.vtp")
 
 class my3Dturtle:
     """
