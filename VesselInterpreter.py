@@ -29,6 +29,8 @@ import pyvista as pv
 import numpy as np
 import math
 import copy
+from tqdm import tqdm
+import vtkmodules.numpy_interface as np2vtk
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
     vtkPolyData,
@@ -52,8 +54,9 @@ def createPolyline(Instructions=[]):
         points.append(t.storePoint())
         newline=[]
         newline.append(0)
+        diam.append(1)
         poly=pv.PolyData()  
-        for instruction in Instructions:
+        for instruction in tqdm(Instructions):
             if instruction[0]=='f':
                 t.move(instruction[2])
                 diam.append(instruction[1])
@@ -76,7 +79,7 @@ def createPolyline(Instructions=[]):
                 newline.append(pos[-1][1])
                 pos.pop()
             else:
-                print('end node')
+                pass
         lines.append(newline)
         ppoints=np.stack(points)
         vtkPoints=vtk_points(ppoints)
@@ -99,9 +102,15 @@ def createPolyline(Instructions=[]):
 
         # Add the lines to the dataset
         polyData.SetLines(cells)
+        #Create data in vtk
+        #VTK_data = np2vtk.numpy_to_vtk(num_array=NumPy_data.ravel(), deep=True, array_type=vtk.VTK_FLOAT)
+        #polyData.GetPointData().SetScalars(VTK_data)
         pvData=pv.PolyData(polyData)
-        tube = pvData.tube(radius=0.1)
+        ## Add data in pyvista
+        pvData.point_data["radius"]=np.array(diam)
+        tube = pvData.tube(radius=0.01,scalars="radius")
         tube.plot(smooth_shading=True)
+        tube.save("vessels.vtp")
 
 class my3Dturtle:
     """

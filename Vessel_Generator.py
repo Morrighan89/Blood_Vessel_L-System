@@ -46,15 +46,18 @@ def main():
     print(writeBifurcation(currentNode))
     """ L-system definition """
     # Rules definition
-    ruleA = [rule('fw', 0.8), rule('bif', 0.2)]
-    ruleB = [rule('fw', 0.33), rule('bif', 0.33), rule('end', 0.34)]
-    ruleC = [rule('fw', 0.33), rule('bif', 0.33), rule('end', 0.34)]
+    ruleA = [rule('fwturn', 0.2),rule('bif', 0.8)]
+    ruleB = [rule('fwturn', 0.5), rule('bif', 0.5)]
+    ruleC = [rule('fwturn', 0.3), rule('bif', 0.2),rule('end',0.5)]
+    ruleE = [ rule('end', 1.0)]
     # Ruleset definition
-    ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC}
+    ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC,'E': ruleE}
     # Lsystem definition (initial state, ruleset)
     ls = Lsystem([['A',1,1]], ruleset,alphabet)
     # generate the string of turtle instructions
-    instruction_string = ls.processGen(15)
+    print("Generating L-System Instruction string set")
+    instruction_string = ls.processGen(28)
+    print("Drawing the Blood Vessel network")
     #print("Drawing the following L-system :\n",instruction_string)
     VesselInterpreter.createPolyline(instruction_string)
 

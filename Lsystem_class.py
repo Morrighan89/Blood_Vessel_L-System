@@ -25,6 +25,8 @@ SOFTWARE.
 
 import random
 import math
+import numpy as np
+from tqdm import tqdm
 
 class Lsystem:
     def __init__(self, axiom=[], ruleset={},alphabet=''):
@@ -48,7 +50,7 @@ class Lsystem:
     def processGen(self, gen=1):
         #  process strings until the given generation
         actualString = self.axiom
-        for i in range(gen):
+        for i in tqdm(range(gen)):
             actualString = self.process(actualString)
         return actualString
 
@@ -57,7 +59,7 @@ class Lsystem:
 
 class rule:
     def __init__(self,ruleType,proba=1):
-        self.ruleTypes=['fw','bif','end']
+        self.ruleTypes=['fw','fwturn','bif','end']
         self.proba = proba
         self.ruleType=ruleType
         if ruleType not in self.ruleTypes:
@@ -68,15 +70,23 @@ class rule:
         rulevalues=[]
         if self.ruleType == 'fw':
             rulevalues.append(['f',node.diam,node.len])
-            #if random.random()<0.001:
-            #    node.diam=node.diam*0.9
-            #    node.len=node.len*0.9
             rulevalues.append([node.vessKind,node.diam,node.len])
             return rulevalues
         elif self.ruleType == 'bif':
             return writeBifurcation(node)
+        elif self.ruleType == 'fwturn':
+            if random.random()<0.5:
+                rulevalues.append(['*',random.uniform(0,np.pi/4)])
+            else:
+                rulevalues.append(['/',random.uniform(0,np.pi/4)])
+            if random.random()<0.5:
+                rulevalues.append(['+',random.uniform(0,np.pi/4)])
+            else:
+                rulevalues.append(['-',random.uniform(0,np.pi/4)])
+            rulevalues.append(['f',node.diam,node.len])
+            rulevalues.append([node.vessKind,node.diam,node.len])
         elif self.ruleType == 'end':
-            rulevalues.append('E')
+            rulevalues.append(['E',0,0])
         return rulevalues
 
 
@@ -107,38 +117,66 @@ class node:
 def writeBifurcation(node):
     ruleString = []
     ruleString.append(['f',node.diam,node.len])
-    params=calculateBifurcation(node.diam,node.len,random.random())
+    params=calculateBifurcation(node.vessKind,node.diam,node.len,random.uniform(0.1,1))
     ruleString.append('[')
     ruleString.append(['+',params['th1']])
+    node.vessKind=vesselKindEvaluation(params['d1'])
     ruleString.append([node.vessKind,params['d1'],params['l1']])
     ruleString.append(']')
     ruleString.append('[')
     ruleString.append(['-',params['th2']])
+    node.vessKind=vesselKindEvaluation(params['d2'])
     ruleString.append([node.vessKind,params['d2'],params['l2']])
     ruleString.append(']')
     return ruleString
 
-def calculateBifurcation(d0,l0,alpha=1):
+def calculateBifurcation(kind,d0,l0,alpha=1):
     params=dict.fromkeys(('d1','l1','th1','ph1','d2','l2','th2','ph2'))
     coin=random.random()
-    gamma1=1/(1+alpha**3)**(1/3)
-    gamma2=alpha/(1+alpha**3)**(1/3)
+    if kind == 'A':
+        alpha=alpha*0.7
+        gamma1=1/(1+alpha**3)**(1/3)
+        gamma2=alpha/(1+alpha**3)**(1/3)
+        lambda1=gamma1
+        lambda2=gamma2
+    elif kind == 'B':
+        alpha=alpha*0.8
+        gamma1=1/(1+alpha**3)**(1/3)
+        gamma2=alpha/(1+alpha**3)**(1/3)
+        lambda1=gamma1
+        lambda2=gamma2
+    else:
+        gamma1=1/(1+alpha**3)**(1/3)
+        gamma2=alpha/(1+alpha**3)**(1/3)
+        lambda1=1
+        lambda2=1
     th1=((1+alpha**3)**(4/3)+1-alpha**4)/(2*(1+alpha**3)**(2/3))
     th2=((1+alpha**3)**(4/3)+alpha**4-1)/(2*alpha**2*(1+alpha**3)**(2/3))
     if coin < 0.5:
         params['d1']=d0*gamma1
         params['d2']=d0*gamma2
-        params['l1']=l0*gamma1
-        params['l2']=l0*gamma2
+        params['l1']=l0*lambda1
+        params['l2']=l0*lambda2
         params['th1']=math.acos(th1)
         params['th2']=math.acos(th2)
     else:
         params['d1']=d0*gamma2
         params['d2']=d0*gamma1
-        params['l1']=l0*gamma2
-        params['l2']=l0*gamma1
+        params['l1']=l0*lambda2
+        params['l2']=l0*lambda1
         params['th1']=math.acos(th2)
         params['th2']=math.acos(th1)
     params['ph1']=random.random()
     params['ph2']=params['ph1']
     return params
+
+def vesselKindEvaluation(diam):
+    if diam<1/100:
+        vessKind='E'
+    elif diam<1/50:
+        vessKind='C'
+    elif diam<1/4:
+        vessKind='B'
+    else:
+        vessKind='A'
+    return vessKind
