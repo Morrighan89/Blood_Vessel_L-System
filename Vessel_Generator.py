@@ -56,11 +56,12 @@ def main():
     ls = Lsystem([['A',1,1]], ruleset,alphabet)
     # generate the string of turtle instructions
     print("Generating L-System Instruction string set")
-    instruction_string = ls.processGen(8)
+    instruction_string = ls.processGen(14)
     print("Drawing the Blood Vessel network")
     #print("Drawing the following L-system :\n",instruction_string)
     VesselInterpreter.createPolyline(instruction_string)
 
+    VesselInterpreter.CreateVoronoiDiagram("vtkVesselTrunc.vtp",199)
 
 if __name__=='__main__':
     main()
