@@ -176,15 +176,15 @@ def CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints):
             startPoint=line.GetPoint(j)
             startingRadius=line.GetPointData().GetArray(radiusArrayName).GetTuple1(j)
             endingRadius=line.GetPointData().GetArray(radiusArrayName).GetTuple1(j+1)
+            
             direction=line.GetPointData().GetArray(parallelTransportNormalsArrayName).GetTuple3(j)
             avgRadiusStep=(endingRadius-startingRadius)/(numberOfInterpolationPoints+1)
-            for k in range (1,numberOfInterpolationPoints+1):
+            for k in range (1,numberOfInterpolationPoints):
                 newVoronoiPoint = [0.0,0.0,0.0]
                 newVoronoiPoint[0] = startPoint[0] + k*(1.0/numberOfInterpolationPoints)*direction[0]
                 newVoronoiPoint[1] = startPoint[1] + k*(1.0/numberOfInterpolationPoints)*direction[1]
                 newVoronoiPoint[2] = startPoint[2] + k*(1.0/numberOfInterpolationPoints)*direction[2]
                 newRadius=startingRadius+float(k)*avgRadiusStep
-                #print(newRadius)
                 newLinePoints.InsertNextPoint(newVoronoiPoint)
                 newRadiusArray.SetTuple1(count,newRadius)
                 count=count+1
@@ -283,11 +283,13 @@ def ExtractLine(cellid,centerlines):
    radArray.FillComponent(0,0.0)
 
 
-   for i in range(numberOfPoints-1):
+   for i in range(numberOfPoints):
         cellArray.InsertCellPoint(i)   
         begPoint = linePoints.GetPoint(i)
-        endPoint = linePoints.GetPoint(i+1)
-    
+        try:
+            endPoint = linePoints.GetPoint(i+1)
+        except:
+            endPoint=begPoint
         vector = [0.0,0.0,0.0]
         vector[0] = endPoint[0] - begPoint[0]
         vector[1] = endPoint[1] - begPoint[1]
@@ -418,8 +420,8 @@ def WritePolyData(input,filename):
    writer.SetInputData(input)
    writer.Write()
 
-#def main(): used for debug purpose of function in this file
-#    CreateVoronoiDiagram("vtkVesselTrunc.vtp",99)
+#def main():# used for debug purpose of function in this file
+#    CreateVoronoiDiagram("vtkVesselTrunc.vtp",9)
 #
 #if __name__=='__main__':
 #    
