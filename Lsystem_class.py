@@ -76,13 +76,13 @@ class rule:
             return writeBifurcation(node)
         elif self.ruleType == 'fwturn':
             if random.random()<0.5:
-                rulevalues.append(['*',random.uniform(0,np.pi/4)])
+                rulevalues.append(['*',random.uniform(0,np.pi*5/16)])
             else:
-                rulevalues.append(['/',random.uniform(0,np.pi/4)])
+                rulevalues.append(['/',random.uniform(0,np.pi*5/16)])
             if random.random()<0.5:
-                rulevalues.append(['+',random.uniform(0,np.pi/4)])
+                rulevalues.append(['+',random.uniform(0,np.pi*5/16)])
             else:
-                rulevalues.append(['-',random.uniform(0,np.pi/4)])
+                rulevalues.append(['-',random.uniform(0,np.pi*5/16)])
             rulevalues.append(['f',node.diam,node.len])
             rulevalues.append([node.vessKind,node.diam,node.len])
         elif self.ruleType == 'end':
@@ -148,7 +148,7 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
     params=dict.fromkeys(('d1','l1','th1','ph1','d2','l2','th2','ph2'))
     coin=random.random()
     if kind == 'A':
-        alpha=alpha*0.7
+        alpha=alpha*0.75
         gamma1=1/(1+alpha**3)**(1/3)
         gamma2=alpha/(1+alpha**3)**(1/3)
         lambda1=gamma1
@@ -185,11 +185,11 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
     return params
 
 def vesselKindEvaluation(diam):
-    if diam<1/100:
+    if diam<1/50:
         vessKind='E'
-    elif diam<1/50:
+    elif diam<1/20:
         vessKind='C'
-    elif diam<1/4:
+    elif diam<1/2:
         vessKind='B'
     else:
         vessKind='A'

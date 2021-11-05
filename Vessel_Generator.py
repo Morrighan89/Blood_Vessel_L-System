@@ -40,15 +40,12 @@ def main():
     alphabet = 'ABCE'
     # Symbols used in L-system
     symbols = 'f+-*+[]'
-    currentNode=node()
-    ruleA=rule('fw')
-    print(ruleA.evaluate(currentNode))
-    print(writeBifurcation(currentNode))
+
     """ L-system definition """
     # Rules definition
     ruleA = [rule('fwturn', 0.2),rule('bif', 0.8)]
-    ruleB = [rule('fwturn', 0.5), rule('bif', 0.5)]
-    ruleC = [rule('fwturn', 0.3), rule('bif', 0.2),rule('end',0.5)]
+    ruleB = [rule('fwturn', 0.3), rule('bif', 0.7)]
+    ruleC = [rule('fwturn', 0.5), rule('bif', 0.2),rule('end',0.3)]
     ruleE = [ rule('end', 1.0)]
     # Ruleset definition
     ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC,'E': ruleE}
@@ -60,9 +57,14 @@ def main():
     print("Drawing the Blood Vessel network")
     #print("Drawing the following L-system :\n",instruction_string)
     VesselInterpreter.createPolyline(instruction_string)
-
-    VesselInterpreter.CreateVoronoiDiagram("vtkVesselTrunc.vtp",199)
-
+    instruction_string=[['E',0,0] if instruction[0]=='A' else instruction for instruction in instruction_string ]
+    ls = Lsystem(instruction_string, ruleset,alphabet)
+    instruction_string_a = ls.processGen(10)
+    VesselInterpreter.createPolyline(instruction_string_a,fileOut="artery")
+    instruction_string_b = ls.processGen(10)
+    VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
+    #VesselInterpreter.CreateVoronoiDiagram("vtkVesselTrunc.vtp",199)
+    VesselInterpreter.visualizePair()
 if __name__=='__main__':
     main()
 
