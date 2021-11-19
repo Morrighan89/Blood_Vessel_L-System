@@ -1,6 +1,11 @@
 # L-system : Probabilistic BloodVessel 3d Generator using Python
 This project allows you to define [L-systems] to define blood vessel networks in a fractal like fashion.
 
+## Example
+
+Even branching            |  Uneven branching
+:-------------------------:|:-------------------------:
+![Alt text](Vessel_Ex3.PNG?raw=true "Blood Vessel Example") |  ![Alt text](Vessel_Ex2.PNG?raw=true "Blood Vessel Example")
 
 
 

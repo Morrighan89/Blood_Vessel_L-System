@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2021 Riccardo Ferrero Scott Chacon and others 
+Copyright (c) 2021 Riccardo Ferrero, Scott Chacon and others 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -119,7 +119,7 @@ def writeBifurcation(node):
     turning=random.random()
     angle=random.uniform(0,np.pi/2)
     ruleString.append(['f',node.diam,node.len])
-    params=calculateBifurcation(node.vessKind,node.diam,node.len,random.uniform(0.1,1))
+    params=calculateBifurcation(node.vessKind,node.diam,node.len,random.uniform(0.2,1))
     ruleString.append('[')
     if turning<0.3:
         ruleString.append(['*',angle])
