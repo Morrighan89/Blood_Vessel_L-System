@@ -167,7 +167,7 @@ def CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints):
     VoronoiDiagram=ConvertClToVoronoi(baseCl)
     numberOfLines=baseCl.GetNumberOfCells()
     numberOfPoints=baseCl.GetNumberOfPoints()
-    print(numberOfLines,numberOfPoints)
+    print(f" Vessel segments: {numberOfLines}, Nodes: {numberOfPoints}")
     for i in tqdm(range(0,numberOfLines)):
         line=ExtractLine(i,baseCl)
         linePtsNumber=line.GetNumberOfPoints()
