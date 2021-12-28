@@ -40,7 +40,7 @@ def main():
     alphabet = 'ABCE'
     # Symbols used in L-system
     symbols = 'f+-*+[]'
-
+#
     """ L-system definition """
     # Rules definition
     ruleA = [rule('fwturn', 0.2),rule('bif', 0.8)]
@@ -53,18 +53,18 @@ def main():
     ls = Lsystem([['A',1,1]], ruleset,alphabet)
     # generate the string of turtle instructions
     print("Generating L-System Instruction string set")
-    instruction_string = ls.processGen(10)
+    instruction_string = ls.processGen(6)
     print("Drawing the Blood Vessel network")
     #print("Drawing the following L-system :\n",instruction_string)
     VesselInterpreter.createPolyline(instruction_string)
     instruction_string=[['E',0,0] if instruction[0]=='A' else instruction for instruction in instruction_string ]
     ls = Lsystem(instruction_string, ruleset,alphabet)
-    instruction_string_a = ls.processGen(10)
-    VesselInterpreter.createPolyline(instruction_string_a,fileOut="artery")
-    instruction_string_b = ls.processGen(10)
-    VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
-    #VesselInterpreter.CreateVoronoiDiagram("vtkVesselTrunc.vtp",199)
-    VesselInterpreter.visualizePair()
+    instruction_string_a = ls.processGen(6)
+    VesselInterpreter.createPolyline(instruction_string_a,fileOut="Vessel06")
+    #instruction_string_b = ls.processGen(10)
+    #VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
+    VesselInterpreter.CreateVoronoiDiagram("vtkVessel06Trunc.vtp",199,ofile="voronoiDiagram06.vtp")
+    #VesselInterpreter.visualizePair()
 if __name__=='__main__':
     main()
 

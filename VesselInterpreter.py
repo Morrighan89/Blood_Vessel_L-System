@@ -35,7 +35,8 @@ import vtkmodules.numpy_interface as np2vtk
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
     vtkPolyData,
-    vtkPolyLine
+    vtkPolyLine,
+    vtkGenericCell
 )
 
 parallelTransportNormalsArrayName = 'ParallelTransportNormals'
@@ -94,7 +95,8 @@ def createPolyline(Instructions=[], startingPos=np.array([0,0,0]),fileOut='vesse
                 newlineTrunc.append(pos[-1][1])
                 pos.pop()
             else:
-                pass
+                #print(f"unrecognized instruction")
+                pass #very wrong you should think about a error message
         lines.append(copy.deepcopy(newline))
         truncLines.append(copy.deepcopy(newlineTrunc))
         ppoints=np.stack(points) #stacks converts the array of arrays in a 2D array for the vtk_points function
@@ -122,6 +124,8 @@ def createPolyline(Instructions=[], startingPos=np.array([0,0,0]),fileOut='vesse
                     polyLine.GetPointIds().SetId(j, truncLines[i][j])
                 # add the lines to it
                 cellsTrunc.InsertNextCell(polyLine)
+        
+        endPointsCoord=[]
 
         # Create a polydata to store everything in
         polyData = vtkPolyData()
@@ -136,12 +140,21 @@ def createPolyline(Instructions=[], startingPos=np.array([0,0,0]),fileOut='vesse
         VTK_data = np2vtk.dataset_adapter.numpyTovtkDataArray(np.array(diam)*0.1,name=radiusArrayName)
         polyData.GetPointData().SetScalars(VTK_data)
         polyDataTrunc.GetPointData().SetScalars(VTK_data)
+        print(polyData.GetNumberOfCells())
+        for i in range(0,polyData.GetNumberOfCells()):
+            cell = vtkGenericCell()
+            polyData.GetCell(i,cell)
+            cellpointsnumber = cell.GetNumberOfPoints()
+            if cellpointsnumber>0:
+                endPoint=cell.GetPoints().GetPoint(cellpointsnumber-1)
+                #print(endPoint)
+                endPointsCoord.append(endPoint)
         """ potentially useful code snippets"""
         #velParam_numpy = 2*velArray 
         #velParam_vtk = numpy_to_vtk(velParam_numpy)
         #velParam_vtk.SetName('VelParam') #rememebr to give an unique name
         #data.GetPointData().AddArray(velParam_vtk) 
-
+        np.savetxt(f"endPoints{fileOut}",endPointsCoord,fmt='%10.5f', delimiter=' ', newline='  ')
         WritePolyData(polyData,"vtk"+fileOut+".vtp")
         WritePolyData(polyDataTrunc,"vtk"+fileOut+"Trunc.vtp")
         pvData=pv.PolyData(polyData)
@@ -162,7 +175,7 @@ def visualizePair():
     p.add_mesh(tubeB, color="lightblue", opacity=0.5)
     p.show()
 
-def CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints):
+def CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints,ofile="voronoiDiagram.vtp"):
     baseCl=ReadPolyData(clFileName)
     VoronoiDiagram=ConvertClToVoronoi(baseCl)
     numberOfLines=baseCl.GetNumberOfCells()
@@ -198,7 +211,7 @@ def CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints):
                 newRadiusArray.SetTuple1(count,newRadius)
                 count=count+1
         VoronoiDiagram=InsertNewVoronoiPoints(VoronoiDiagram,newLinePoints,newRadiusArray)
-    WritePolyData(VoronoiDiagram,"voronoiDiagram.vtp")
+    WritePolyData(VoronoiDiagram,ofile)
 
 def InsertNewVoronoiPoints(oldDataset,newPoints,newArray):
     numberOfDatasetPoints = oldDataset.GetNumberOfPoints()
