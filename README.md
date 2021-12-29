@@ -30,7 +30,7 @@ Basic understanding of the L-System to create fractal structure can be found in 
     ```python
     FromVoronoiToSurface.py
     ```
-    Modify the script to use the file generated previously in Vessel_Generator.py by this line
+    Modify the script FromVoronoiToSurface.py changing the value of the variable clippedVoronoiFilename  in line 463  to use the file generated previously in Vessel_Generator.py in this line
      ```python
      VesselInterpreter.CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints,ofile="voronoiDiagram.vtp")
      ```
