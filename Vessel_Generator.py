@@ -45,7 +45,7 @@ def main():
     # Rules definition
     ruleA = [rule('fwturn', 0.2),rule('bif', 0.8)]
     ruleB = [rule('fwturn', 0.3), rule('bif', 0.7)]
-    ruleC = [rule('fwturn', 0.5), rule('bif', 0.2),rule('end',0.3)]
+    ruleC = [rule('fwturn', 0.6), rule('bif', 0.1),rule('end',0.3)]
     ruleE = [ rule('end', 1.0)]
     # Ruleset definition
     ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC,'E': ruleE}
@@ -59,11 +59,11 @@ def main():
     VesselInterpreter.createPolyline(instruction_string)
     instruction_string=[['E',0,0] if instruction[0]=='A' else instruction for instruction in instruction_string ]
     ls = Lsystem(instruction_string, ruleset,alphabet)
-    instruction_string_a = ls.processGen(6)
-    VesselInterpreter.createPolyline(instruction_string_a,fileOut="Vessel06")
+    instruction_string_a = ls.processGen(5)
+    VesselInterpreter.createPolyline(instruction_string_a,fileOut="Vessel12")
     #instruction_string_b = ls.processGen(10)
     #VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
-    VesselInterpreter.CreateVoronoiDiagram("vtkVessel06Trunc.vtp",199,ofile="voronoiDiagram06.vtp")
+    VesselInterpreter.CreateVoronoiDiagram("vtkVessel12Trunc.vtp",199,ofile="voronoiDiagram12.vtp")
     #VesselInterpreter.visualizePair()
 if __name__=='__main__':
     main()
