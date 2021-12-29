@@ -30,7 +30,7 @@ Basic understanding of the L-System to create fractal structure can be found in 
     ```python
     FromVoronoiToSurface.py
     ```
-    Modify the script FromVoronoiToSurface.py changing the value of the variable clippedVoronoiFilename  in line 463  to use the file generated previously in Vessel_Generator.py in this line
+    Modify the script FromVoronoiToSurface.py cpassing the correct input filename in line 518  to use the file generated previously in Vessel_Generator.py in this line
      ```python
      VesselInterpreter.CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints,ofile="voronoiDiagram.vtp")
      ```
@@ -40,7 +40,7 @@ Basic understanding of the L-System to create fractal structure can be found in 
     ```
 4. compute the centerlines from the decimated surface and the list of output points provided by the script Vessel_Generator.py
     ```
-    vmtksurfacereader -ifile reconstructedmodel_dec.vtp" --pipe     vmtkcenterlines  -seedselector pointlist -sourcepoints 0 0 0    -targetpoints 1 1 1 2 2 2 3 3 3 -ofile reconstructedmodel05_dec_cl.vtp
+    vmtksurfacereader -ifile reconstructedmodel_dec.vtp --pipe     vmtkcenterlines  -seedselector pointlist -sourcepoints 0 0 0    -targetpoints 1 1 1 2 2 2 3 3 3 -ofile reconstructedmodel05_dec_cl.vtp
     ```
 5. remesh the surface with vmtk (use the centerlines to obtain a radius adaptive mesh)
     ```
