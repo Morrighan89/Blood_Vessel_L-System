@@ -101,6 +101,8 @@ def createPolyline(Instructions=[], startingPos=np.array([0,0,0]),fileOut='vesse
         truncLines.append(copy.deepcopy(newlineTrunc))
         ppoints=np.stack(points) #stacks converts the array of arrays in a 2D array for the vtk_points function
         vtkPoints=vtk_points(ppoints)
+        lines.sort(key=len,reverse=True)
+        truncLines.sort(key=len,reverse=True)
         # Create a cell array to store the lines
         cells = vtkCellArray()
         cellsTrunc = vtkCellArray()

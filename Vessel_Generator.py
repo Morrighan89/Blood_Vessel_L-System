@@ -60,10 +60,10 @@ def main():
     instruction_string=[['E',0,0] if instruction[0]=='A' else instruction for instruction in instruction_string ]
     ls = Lsystem(instruction_string, ruleset,alphabet)
     instruction_string_a = ls.processGen(5)
-    VesselInterpreter.createPolyline(instruction_string_a,fileOut="Vessel12")
+    VesselInterpreter.createPolyline(instruction_string_a,fileOut="Vessel13")
     #instruction_string_b = ls.processGen(10)
     #VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
-    VesselInterpreter.CreateVoronoiDiagram("vtkVessel12Trunc.vtp",199,ofile="voronoiDiagram12.vtp")
+    VesselInterpreter.CreateVoronoiDiagram("vtkVessel13Trunc.vtp",199,ofile="voronoiDiagram13.vtp")
     #VesselInterpreter.visualizePair()
 if __name__=='__main__':
     main()
