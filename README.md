@@ -48,7 +48,7 @@ Basic understanding of the L-System to create fractal structure can be found in 
     ```
 6. Recompute nice and smooth centerlines
     ```
-    vmtksurfacereader -ifile reconstructedmodel_re.vtp --pipe  vmtkcenterlines  -seedselector pointlist -sourcepoints 0 0 0     -targetpoints 1 1 1 2 2 2 3 3 3 -ofile reconstructedmodel05_re_cl.vtp
+    vmtksurfacereader -ifile reconstructedmodel_re.vtp --pipe  vmtkcenterlines  -seedselector pointlist -sourcepoints 0 0 0     -targetpoints 1 1 1 2 2 2 3 3 3 -ofile reconstructedmodel_re_cl.vtp
     ```
 7. use them to open the ends of the surface and create inlet and outlets
     ```
