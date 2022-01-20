@@ -185,7 +185,7 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
     return params
 
 def vesselKindEvaluation(diam):
-    if diam<1/50:
+    if diam<1/30:
         vessKind='E'
     elif diam<1/15:
         vessKind='C'

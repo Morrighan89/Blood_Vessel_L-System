@@ -50,20 +50,20 @@ def main():
     # Ruleset definition
     ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC,'E': ruleE}
     # Lsystem definition (initial state, ruleset)
-    ls = Lsystem([['A',1,1]], ruleset,alphabet)
+    ls = Lsystem([['A',1,2]], ruleset,alphabet)
     # generate the string of turtle instructions
     print("Generating L-System Instruction string set")
-    instruction_string = ls.processGen(6)
+    instruction_string = ls.processGen(8)
     print("Drawing the Blood Vessel network")
     #print("Drawing the following L-system :\n",instruction_string)
     VesselInterpreter.createPolyline(instruction_string)
     instruction_string=[['E',0,0] if instruction[0]=='A' else instruction for instruction in instruction_string ]
     ls = Lsystem(instruction_string, ruleset,alphabet)
-    instruction_string_a = ls.processGen(5)
-    VesselInterpreter.createPolyline(instruction_string_a,fileOut="Vessel13")
+    #instruction_string_a = ls.processGen(3)
+    VesselInterpreter.createPolyline(instruction_string,fileOut="Vessel15")
     #instruction_string_b = ls.processGen(10)
     #VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
-    VesselInterpreter.CreateVoronoiDiagram("vtkVessel13Trunc.vtp",199,ofile="voronoiDiagram13.vtp")
+    VesselInterpreter.CreateVoronoiDiagram("vtkVessel15Trunc.vtp",199,ofile="voronoiDiagram15.vtp")
     #VesselInterpreter.visualizePair()
 if __name__=='__main__':
     main()
