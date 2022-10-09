@@ -67,7 +67,7 @@ Please refer also to the individual packages installation notes
     ```python
     FromVoronoiToSurface.py
     ```
-    Modify the script FromVoronoiToSurface.py cpassing the correct input filename in line 518  to use the file generated previously in Vessel_Generator.py in this line
+    Modify the script FromVoronoiToSurface.py cpassing the correct input filename in line 58  to use the file generated previously in Vessel_Generator.py in this line
      ```python
      VesselInterpreter.CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints,ofile="voronoiDiagram.vtp")
      ```
