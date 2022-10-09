@@ -15,18 +15,55 @@ Basic understanding of the L-System to create fractal structure can be found in 
 1. [L-systems : draw nice fractals and plants (part I)](https://medium.com/@hhtun21/l-systems-draw-your-first-fractals-139ed0bfcac2)
 2. [L-systems: draw a stochastic plant (part II)](https://medium.com/@hhtun21/l-systems-draw-a-stochastic-plant-ii-f322df2ea3c5)
 
+# Installation note
+To use this scripts the following packages are required
 
+- NumPy
+- imageio
+- appdirs
+- meshio
+- scooby
+- tqdm
+- MatplotLib
+- vtk
+- PyVista
+
+For more details refer to the single packages installation requirements.
+
+Python **3.6.+** is **required**
+
+We suggest to create a new environment using anaconda and proceed to install all the packages from conda forge using the example code provided
+
+
+```
+conda create -n myenv python=3.6
+conda activate myenv
+conda install -c conda-forge numpy
+conda install -c conda-forge imageio
+conda install -c conda-forge appdirs
+conda install -c conda-forge meshio
+conda install -c conda-forge scooby
+conda install -c conda-forge tdqm
+conda install -c conda-forge matplotlib
+conda install -c conda-forge vtk
+conda install -c conda-forge PyVista
+conda install -c vmtk vtk itk vmtk
+```
+
+Please refer also to the individual packages installation notes
 
 ### Steps and instruction
 
-1. (conda activate TumorVessel) and Run
+1. (conda activate myenv) and Run
    ```python
     Vessel_Generator.py
     ```
     until desired branch is generated.
 
     Branching parameters can be tweaked in the script Vessel_generator.py acting on the rule weights. Rule can be modified in Lsystem_class.py
-2. (conda activate vmtkEnv) and Run 
+	
+	Now you have a nice set of branching points and bloodvessel diameters, as well as blood vessels centerlines. If you need a surface go further.
+2.  Run 
     ```python
     FromVoronoiToSurface.py
     ```
@@ -34,6 +71,7 @@ Basic understanding of the L-System to create fractal structure can be found in 
      ```python
      VesselInterpreter.CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints,ofile="voronoiDiagram.vtp")
      ```
+	
 3. use vmtk pypad to decimate the obtained surface
     ```
     vmtksurfacedecimation -ifile reconstructedmodel.vtp -ofile  reconstructedmodel_dec.vtp
