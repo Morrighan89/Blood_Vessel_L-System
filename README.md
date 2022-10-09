@@ -52,7 +52,7 @@ conda install -c vmtk vtk itk vmtk
 
 Please refer also to the individual packages installation notes
 
-### Steps and instruction
+# Steps and instruction
 
 1. (conda activate myenv) and Run
    ```python
