@@ -52,7 +52,7 @@ conda install -c vmtk vtk itk vmtk
 
 Please refer also to the individual packages installation notes
 
-# Steps and instruction
+# Steps and instructions
 
 1. (conda activate myenv) and Run
    ```python
@@ -96,7 +96,7 @@ Please refer also to the individual packages installation notes
     ```
     vmtkdistancetocenterlines -ifile reconstructedmodel_re_ct.vtp     -centerlinesfile reconstructedmodel05_re_cl.vtp -useradius 1    --pipe vmtkmeshgenerator -elementsizemode edgelengtharray   -edgelengtharray DistanceToCenterlines -edgelengthfactor 0.3 -ofile   reconstructedmodel_vol.vtu
     ```
-9. Inspect bounbdary
+9. Inspect boundary
     ```
     vmtkmeshboundaryinspector -ifile reconstructedmodel_vol.vtu -entityidsarray CellEntityIds 
     ```
