@@ -43,7 +43,7 @@ conda install -c conda-forge imageio
 conda install -c conda-forge appdirs
 conda install -c conda-forge meshio
 conda install -c conda-forge scooby
-conda install -c conda-forge tdqm
+conda install -c conda-forge tqdm
 conda install -c conda-forge matplotlib
 conda install -c conda-forge vtk
 conda install -c conda-forge PyVista
