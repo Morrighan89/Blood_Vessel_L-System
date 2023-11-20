@@ -76,13 +76,13 @@ class rule:
             return writeBifurcation(node)
         elif self.ruleType == 'fwturn':
             if random.random()<0.5:
-                rulevalues.append(['*',random.uniform(0,np.pi*5/16)])
+                rulevalues.append(['*',random.uniform(0,np.pi*3/16)])
             else:
-                rulevalues.append(['/',random.uniform(0,np.pi*5/16)])
+                rulevalues.append(['/',random.uniform(0,np.pi*3/16)])
             if random.random()<0.5:
-                rulevalues.append(['+',random.uniform(0,np.pi*5/16)])
+                rulevalues.append(['+',random.uniform(0,np.pi*3/16)])
             else:
-                rulevalues.append(['-',random.uniform(0,np.pi*5/16)])
+                rulevalues.append(['-',random.uniform(0,np.pi*3/16)])
             rulevalues.append(['f',node.diam,node.len])
             rulevalues.append([node.vessKind,node.diam,node.len])
         elif self.ruleType == 'end':
@@ -117,9 +117,9 @@ class node:
 def writeBifurcation(node):
     ruleString = []
     turning=random.random()
-    angle=random.uniform(0,np.pi/2)
+    angle=random.uniform(np.pi/6,np.pi/2)
     ruleString.append(['f',node.diam,node.len])
-    params=calculateBifurcation(node.vessKind,node.diam,node.len,random.uniform(0.2,1))
+    params=calculateBifurcation(node.vessKind,node.diam,node.len,random.uniform(0.8,1))
     ruleString.append('[')
     if turning<0.3:
         ruleString.append(['*',angle])
@@ -148,22 +148,22 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
     params=dict.fromkeys(('d1','l1','th1','ph1','d2','l2','th2','ph2'))
     coin=random.random()
     if kind == 'A':
-        alpha=alpha*0.75
-        gamma1=1/(1+alpha**3)**(1/3)
-        gamma2=alpha/(1+alpha**3)**(1/3)
-        lambda1=gamma1
-        lambda2=gamma2
+        alpha=alpha
+        gamma1=0.9#1/(1+alpha**3)**(1/3)
+        gamma2=0.9#alpha/(1+alpha**3)**(1/3)
+        lambda1=0.8#gamma1
+        lambda2=0.8#gamma2
     elif kind == 'B':
-        alpha=alpha*0.8
-        gamma1=1/(1+alpha**3)**(1/3)
-        gamma2=alpha/(1+alpha**3)**(1/3)
-        lambda1=gamma1
-        lambda2=gamma2
+        alpha=alpha
+        gamma1=0.89#1/(1+alpha**3)**(1/3)
+        gamma2=0.89#alpha/(1+alpha**3)**(1/3)
+        lambda1=0.85#gamma1
+        lambda2=0.85#gamma2
     else:
         gamma1=1/(1+alpha**3)**(1/3)
         gamma2=alpha/(1+alpha**3)**(1/3)
-        lambda1=1
-        lambda2=1
+        lambda1=0.9
+        lambda2=0.9
     th1=((1+alpha**3)**(4/3)+1-alpha**4)/(2*(1+alpha**3)**(2/3))
     th2=((1+alpha**3)**(4/3)+alpha**4-1)/(2*alpha**2*(1+alpha**3)**(2/3))
     if coin < 0.5:

@@ -130,3 +130,14 @@ dmypy.json
 
 # datafiles
 *.vtp
+*.brep
+*.msh
+*.vtk
+endPoints*
+
+
+#temp files
+/temp
+
+#saved struvture
+/villi16

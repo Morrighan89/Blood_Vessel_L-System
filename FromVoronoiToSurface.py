@@ -27,7 +27,7 @@ def from_voronoi_to_surf(fileIn='voronoiDiagram',fileOut='reconstructedmodel.vtp
 
    #OPTIONS TO SET
    interpolationHalfSize = 3
-   polyBallImageSize = [1800,1800,1800]   #size of the image for the evaluation of the polyball function
+   polyBallImageSize = [1200,1200,1200]   #size of the image for the evaluation of the polyball function
 
    
 
@@ -55,7 +55,7 @@ def from_voronoi_to_surf(fileIn='voronoiDiagram',fileOut='reconstructedmodel.vtp
    WritePolyData(envelope,surfaceFilename)
 
 def main():
-   from_voronoi_to_surf(fileIn='voronoiDiagram15.vtp',fileOut='reconstructedmodel15.vtp')
+   from_voronoi_to_surf(fileIn='voronoiDiagram6.vtp',fileOut='reconstructedmodel6.vtp')
 
 if __name__=='__main__':
     main()
