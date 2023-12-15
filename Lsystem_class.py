@@ -157,10 +157,14 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
     coin=random.random()
     if kind == 'A':
         alpha=alpha
-        gamma1=0.9#1/(1+alpha**3)**(1/3)
-        gamma2=0.9#alpha/(1+alpha**3)**(1/3)
-        lambda1=0.8#gamma1
-        lambda2=0.8#gamma2
+        #gamma1=0.9#1/(1+alpha**3)**(1/3)
+        #gamma2=0.9#alpha/(1+alpha**3)**(1/3)
+        #lambda1=0.8#gamma1
+        #lambda2=0.8#gamma2
+        gamma1=1/(1+alpha**3)**(1/3)
+        gamma2=alpha/(1+alpha**3)**(1/3)
+        lambda1=gamma1
+        lambda2=gamma2
     elif kind == 'B':
         alpha=alpha
         gamma1=0.89#1/(1+alpha**3)**(1/3)

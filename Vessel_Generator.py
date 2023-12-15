@@ -42,6 +42,7 @@ def main():
     symbols = 'f+-*+[]'
     structure_name='Villi'
     version=30
+    initial_diameter=1.7
 #
     """ L-system definition """
     # Rules definition
@@ -52,18 +53,18 @@ def main():
     # Ruleset definition
     ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC,'E': ruleE}
     # Lsystem definition (initial state, ruleset)
-    ls = Lsystem([['A',1,2.4]], ruleset,alphabet)
+    ls = Lsystem([['A',initial_diameter,2.4]], ruleset,alphabet)
     # generate the string of turtle instructions
     print("Generating L-System Instruction string set")
     instruction_string = ls.processGen(15)
     print("Drawing the Blood Vessel network")
     #print("Drawing the following L-system :\n",instruction_string)
-    VesselInterpreter.createPolyline(instruction_string)
+    VesselInterpreter.createPolyline(instruction_string,initial_diameter=initial_diameter)
     instruction_string=[['E',0,0] if instruction[0]=='A' else instruction for instruction in instruction_string ]
     instruction_string=[['C',instruction[1],instruction[2]] if instruction[0]=='B' else instruction for instruction in instruction_string ]
     ls = Lsystem(instruction_string, ruleset,alphabet)
-    instruction_string_a = ls.processGen(17)
-    VesselInterpreter.createPolyline(instruction_string_a,fileOut=f'{structure_name}{version}',truncWithRoot=False)
+    instruction_string_a = ls.processGen(5)
+    VesselInterpreter.createPolyline(instruction_string_a,initial_diameter=initial_diameter,fileOut=f'{structure_name}{version}',truncWithRoot=False)
     #instruction_string_b = ls.processGen(10) ##this set of instruction is to generate a secondary slighty traslated vesesel network to mimic the veins.
     #VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
 

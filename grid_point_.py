@@ -109,21 +109,23 @@ def lines_in_3d_grid(grid_size,domain_size, points,lines):
             grid[grid_x1, grid_y1, grid_z1].append(cell_id)
             percentage[grid_x1, grid_y1, grid_z1].append(1)
         else:
-            grid[grid_x1, grid_y1, grid_z1].append(cell_id)
-            grid[grid_x2, grid_y2, grid_z2].append(cell_id)
+            #grid[grid_x1, grid_y1, grid_z1].append(cell_id)
+            #grid[grid_x2, grid_y2, grid_z2].append(cell_id)
             distance=pairwise_distances_numpy(np.array([x1, y1, z1]),np.array([x2, y2, z2]))
             direction=np.array([x1, y1, z1])-np.array([x2, y2, z2])
-            #for i in range(min(grid_x1,grid_x2),max(grid_x1,grid_x2)+1):
-            #    for j in range(min(grid_x1,grid_x2),max(grid_x1,grid_x2)+1):
-            #        for k in range(min(grid_x1,grid_x2),max(grid_x1,grid_x2)+1):
-
-            
-            inersection1=intersect_segment_cube([x1, y1, z1],[x2, y2, z2],[grid_x1+0.5, grid_y1+0.5, grid_z1+0.5],[0.5,0.5,0.5])
-            inersection2=intersect_segment_cube([x2, y2, z2],[x1, y1, z1],[grid_x2+0.5, grid_y2+0.5, grid_z2+0.5],[0.5,0.5,0.5])
-            distance1=pairwise_distances_numpy(np.array([x1, y1, z1]),inersection1)
-            distance2=pairwise_distances_numpy(np.array([x2, y2, z2]),inersection2)
-            percentage[grid_x1, grid_y1, grid_z1].append(distance1/distance)
-            percentage[grid_x2, grid_y2, grid_z2].append(distance2/distance)
+            for i in range(min(grid_x1,grid_x2),max(grid_x1,grid_x2)+1):
+                for j in range(min(grid_y1,grid_y2),max(grid_y1,grid_y2)+1):
+                    for k in range(min(grid_z1,grid_z2),max(grid_z1,grid_z2)+1):
+                        intersection1,intersection2=intersect_segment_cube([x1, y1, z1],[x2, y2, z2],[i+0.5, j+0.5, k+0.5],[0.5,0.5,0.5])
+                        distance_intersections=pairwise_distances_numpy(intersection1,intersection2)
+                        grid[i,j,k].append(cell_id)
+                        percentage[i,j,k].append(distance_intersections/distance)
+            #inersection1,intersection2=intersect_segment_cube([x1, y1, z1],[x2, y2, z2],[grid_x1+0.5, grid_y1+0.5, grid_z1+0.5],[0.5,0.5,0.5])
+            #inersection2,intersection1=intersect_segment_cube([x2, y2, z2],[x1, y1, z1],[grid_x2+0.5, grid_y2+0.5, grid_z2+0.5],[0.5,0.5,0.5])
+            #distance1=pairwise_distances_numpy(np.array([x1, y1, z1]),intersection1)
+            #distance2=pairwise_distances_numpy(np.array([x2, y2, z2]),intersection2)
+            #percentage[grid_x1, grid_y1, grid_z1].append(distance1/distance)
+            #percentage[grid_x2, grid_y2, grid_z2].append(distance2/distance)
 
     return grid, percentage
 def my_get_points(points,cell,id):
@@ -139,7 +141,7 @@ def intersect_segment_cube(p1, p2, cube_center, cube_half_size):
     
     # Direction vector of the line segment
     direction = np.array(p2) - np.array(p1)
-    
+    distance=pairwise_distances_numpy(np.array(p1),np.array(p2))
     # Calculate the minimum and maximum t-values for each face of the cube
     t_min = np.full_like(direction, -np.inf)
     t_max = np.full_like(direction, np.inf)
@@ -167,11 +169,17 @@ def intersect_segment_cube(p1, p2, cube_center, cube_half_size):
     # Check if the segment is behind the viewer
     if t_exit < 0:
         return None  # No intersection
+    if t_entry < 0:
+        intersection_point2 = np.array(p1)
+    else:
+        intersection_point2 = np.array(p1) + t_entry * direction
 
     # Calculate the intersection point
-    intersection_point = np.array(p1) + t_exit * direction
-
-    return intersection_point
+    if np.linalg.norm(t_exit * direction)<distance:
+        intersection_point1 = np.array(p1) + t_exit * direction
+    else:
+        intersection_point1 = np.array(p2)
+    return intersection_point1,intersection_point2
 
 def count_points_in_grid(grid):
     counts = np.bincount(grid.flatten())
@@ -452,7 +460,7 @@ def select_cube_lines_and_points(indices,lines_polydata,lines_in_grid,fname='sub
     #return
 
 def main():
-    grid_size = (20, 20, 20)
+    grid_size = (15, 15, 15)
     vtp_file_folder = './'
     vtp_ifile_name='vtkVilli29trunc.vtp'
     vtp_ifile_path=os.path.join(vtp_file_folder,vtp_ifile_name)
@@ -488,7 +496,7 @@ def main():
 
     # Export the grid as VTK StructuredGrid with the count as a numeric attribute
     #output_vtk_file = 'output_grid28.vts'
-    export_vtk_structured_grid(grid,porosities,domain_size,min_coords, counts,f'{os.path.splitext(vtp_ifile_name)[0]}_grid.vts')
+    export_vtk_structured_grid(grid,porosities,domain_size,min_coords, counts,f'{os.path.splitext(vtp_ifile_name)[0]}_grid2.vts')
 
 if __name__ == "__main__":
     main()
