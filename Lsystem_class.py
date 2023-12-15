@@ -145,6 +145,14 @@ def writeBifurcation(node):
     return ruleString
 
 def calculateBifurcation(kind,d0,l0,alpha=1):
+    '''
+    Takes as input ta root and computes the resulting bifurcation:
+        - Kind node kind
+        - d0 root diameter
+        - l0 root lenght
+        - alpha  asymmetry factor
+    Branching is fixed or based on "1 G. Hichem and J. Malek, in 2012 6th International Conference on Sciences of Electronics, Technologies of Information and Telecommunications (SETIT), IEEE, Sousse, Tunisia, 2012, pp. 287–292."
+    '''
     params=dict.fromkeys(('d1','l1','th1','ph1','d2','l2','th2','ph2'))
     coin=random.random()
     if kind == 'A':
@@ -165,7 +173,8 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
         lambda1=0.9
         lambda2=0.9
     th1=((1+alpha**3)**(4/3)+1-alpha**4)/(2*(1+alpha**3)**(2/3))
-    th2=((1+alpha**3)**(4/3)+alpha**4-1)/(2*alpha**2*(1+alpha**3)**(2/3))
+    th2=((1+alpha**3)**(4/3)+alpha**4-1)/(2*alpha**2*(1+alpha**3)**(2/3))    ##1 G. Hichem and J. Malek, in 2012 6th International Conference on Sciences of Electronics, Technologies of Information and Telecommunications (SETIT), IEEE, Sousse, Tunisia, 2012, pp. 287–292.
+
     if coin < 0.5:
         params['d1']=d0*gamma1
         params['d2']=d0*gamma2

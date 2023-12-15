@@ -40,30 +40,34 @@ def main():
     alphabet = 'ABCE'
     # Symbols used in L-system
     symbols = 'f+-*+[]'
+    structure_name='Villi'
+    version=30
 #
     """ L-system definition """
     # Rules definition
-    ruleA = [rule('fwturn', 0.2),rule('bif', 0.8)]
-    ruleB = [rule('fwturn', 0.3), rule('bif', 0.7)]
-    ruleC = [rule('fwturn', 0.6), rule('bif', 0.1),rule('end',0.3)]
+    ruleA = [rule('fwturn', 0.01),rule('bif', 0.99)]
+    ruleB = [rule('fwturn', 0.7),rule('bif', 0.3)]
+    ruleC = [rule('fwturn', 0.2),rule('bif', 0.5),rule('end',0.3)]
     ruleE = [ rule('end', 1.0)]
     # Ruleset definition
     ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC,'E': ruleE}
     # Lsystem definition (initial state, ruleset)
-    ls = Lsystem([['A',1,2]], ruleset,alphabet)
+    ls = Lsystem([['A',1,2.4]], ruleset,alphabet)
     # generate the string of turtle instructions
     print("Generating L-System Instruction string set")
-    instruction_string = ls.processGen(8)
+    instruction_string = ls.processGen(15)
     print("Drawing the Blood Vessel network")
     #print("Drawing the following L-system :\n",instruction_string)
     VesselInterpreter.createPolyline(instruction_string)
     instruction_string=[['E',0,0] if instruction[0]=='A' else instruction for instruction in instruction_string ]
+    instruction_string=[['C',instruction[1],instruction[2]] if instruction[0]=='B' else instruction for instruction in instruction_string ]
     ls = Lsystem(instruction_string, ruleset,alphabet)
-    #instruction_string_a = ls.processGen(3)
-    VesselInterpreter.createPolyline(instruction_string,fileOut="Vessel15")
-    #instruction_string_b = ls.processGen(10)
+    instruction_string_a = ls.processGen(17)
+    VesselInterpreter.createPolyline(instruction_string_a,fileOut=f'{structure_name}{version}',truncWithRoot=False)
+    #instruction_string_b = ls.processGen(10) ##this set of instruction is to generate a secondary slighty traslated vesesel network to mimic the veins.
     #VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
-    VesselInterpreter.CreateVoronoiDiagram("vtkVessel15Trunc.vtp",199,ofile="voronoiDiagram15.vtp")
+
+    #VesselInterpreter.CreateVoronoiDiagram("vtkVilli9.vtp",199,ofile="voronoiDiagram9.vtp")
     #VesselInterpreter.visualizePair()
 if __name__=='__main__':
     main()

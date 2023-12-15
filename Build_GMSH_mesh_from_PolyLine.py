@@ -46,8 +46,13 @@ def create_gmsh_mesh_carving(clFileName,ofile="gmsh.msh"):
     #dx,dy,dz=3.195877166439165,2.9768761114761113,2.5549797529430096
     #cx,cy,cz=0.22723123693223046,-1.117517697735693,-1.5175201865734897  # villi14
     #dx,dy,dz=2.0870246230892904,2.8587875728566874,3.0326460420042394    # villi14
-    cx,cy,cz=0.4897231334111418,-0.4990486324439569,-1.4965857674994025# villi15
-    dx,dy,dz=1.9164413473292243,2.5604400762919113,2.7007688261857514# villi15
+    #cx,cy,cz=0.4897231334111418,-0.4990486324439569,-1.4965857674994025# villi15
+    #dx,dy,dz=1.9164413473292243,2.5604400762919113,2.7007688261857514# villi15
+
+    #cx,cy,cz=8.8,2,-5.5
+    #dx,dy,dz=1,1,1
+    cx,cy,cz=6.82,7.75,6.05
+    dx,dy,dz=0.971,0.971,0.971
     
     box=gmsh.model.occ.addBox(cx,cy,cz, dx,dy,dz)
     volumes=gmsh.model.occ.getEntities(dim=3)
@@ -66,6 +71,7 @@ def create_gmsh_mesh_carving(clFileName,ofile="gmsh.msh"):
                 direction=line.GetPointData().GetArray(parallelTransportNormalsArrayName).GetTuple3(j)
                 if startingRadius==endingRadius:
                     cone = gmsh.model.occ.addCylinder(startPoint[0],startPoint[1],startPoint[2],direction[0], direction[1],direction[2], startingRadius)
+                    newtrunks.append((3,cone))
                 else:
                     cone = gmsh.model.occ.addCone(startPoint[0],startPoint[1],startPoint[2],direction[0], direction[1],direction[2], startingRadius,endingRadius)
                     newtrunks.append((3,cone))
@@ -86,7 +92,7 @@ def create_gmsh_mesh_carving(clFileName,ofile="gmsh.msh"):
         volumes=gmsh.model.occ.getEntities(dim=3)
         gmsh.model.occ.synchronize()
         count=count+1
-        if ((count % 1) == 0 or i==1):
+        if ((count % 10) == 0 or i==1):
             gmsh.write(f'temp\model_{name_ofile}_{i}.brep')
     #cx,cy,cz=0.8734448800133734, -2.081709684995058, 1.6177133644915518
     #cx,cy,cz=0.12864125650976543,-2.0758902928179417,-1.8674509158982868
@@ -144,9 +150,9 @@ def create_gmsh_mesh_adding(clFileName,folder="temp",ofile="gmsh.msh",scalingfac
     numberOfLines=baseCl.GetNumberOfCells()
     numberOfPoints=baseCl.GetNumberOfPoints()
     print(f" Vessel segments: {numberOfLines}, Nodes: {numberOfPoints}")
-    options=['t1.geo','-tol', '1.e-9','-setnumber', 'Geometry.OCCFixDegenerated', '1','-setnumber', 'Geometry.OCCFixSmallEdges', '1','-setnumber', 'Geometry.OCCFixSmallFaces', '1']
+    options=['t1.geo','-tol', '1.e-4','-setnumber', 'Geometry.OCCFixDegenerated', '1','-setnumber', 'Geometry.OCCFixSmallEdges', '1','-setnumber', 'Geometry.OCCFixSmallFaces', '1']
     gmsh.initialize(argv=options)
-    gmsh.initialize()
+    
     gmsh.model.add("DFG 3D")
     
     newdims=[]
@@ -160,36 +166,55 @@ def create_gmsh_mesh_adding(clFileName,folder="temp",ofile="gmsh.msh",scalingfac
     else:
         trunk = gmsh.model.occ.addCone(startPoint[0],startPoint[1],startPoint[2],direction[0], direction[1],direction[2], startingRadius, endingRadius)
     ball = gmsh.model.occ.addSphere(startPoint[0]+direction[0],startPoint[1]+direction[1],startPoint[2]+direction[2],endingRadius)
-    for i in range(14, numberOfLines+1):#chain(range(381,401),range(401,numberOfLines)):#range(0, numberOfLines):#chain(range(0,136),range(138,161),range(181,numberOfLines)):#chain(range(0,136),range(138,numberOfLines))
+    badboys=[]
+    
+    for i in range(561, numberOfLines-1):#chain(range(381,401),range(401,numberOfLines)):#range(0, numberOfLines):#chain(range(0,136),range(138,161),range(181,numberOfLines)):#chain(range(0,136),range(138,numberOfLines))
         line=ExtractLine(i,baseCl)
         linePtsNumber=line.GetNumberOfPoints()
         newtrunks=[]
+        cones=[]
+        balls=[]
+        print(i)
 
         volumes=gmsh.model.occ.getEntities(dim=3) 
-        for j in range(1,linePtsNumber-1): #linePtsNumber-1
+        oldVolumes=gmsh.model.occ.getEntities(dim=3) 
+        #try:
+        for j in range(0,linePtsNumber-1): #linePtsNumber-1
             startPoint=line.GetPoint(j)
             startingRadius=scalingfactor*line.GetPointData().GetArray(radiusArrayName).GetTuple1(j)
             endingRadius=scalingfactor*line.GetPointData().GetArray(radiusArrayName).GetTuple1(j+1)
             direction=line.GetPointData().GetArray(parallelTransportNormalsArrayName).GetTuple3(j)
             if startingRadius==endingRadius:
                 cone = gmsh.model.occ.addCylinder(startPoint[0],startPoint[1],startPoint[2],direction[0], direction[1],direction[2], startingRadius)
+                cones.append((3,cone))
             else:
-                cone = gmsh.model.occ.addCone(startPoint[0],startPoint[1],startPoint[2],direction[0], direction[1],direction[2], startingRadius,endingRadius)
-                newtrunks.append((3,cone))
-            if j<linePtsNumber-2:
+                cone = gmsh.model.occ.addCone(startPoint[0],startPoint[1],startPoint[2],direction[0], direction[1],direction[2], startingRadius,   endingRadius)
+                cones.append((3,cone))
+            if j<linePtsNumber-1:
                 ball = gmsh.model.occ.addSphere(startPoint[0]+direction[0],startPoint[1]+direction[1],startPoint[2]+direction[2],endingRadius*1.01)
-                newtrunks.append((3,ball))
+                balls.append((3,ball))
+                test=gmsh.model.occ.fuse(cones,balls,removeObject= True, removeTool= True)
+                
             #if j==0:
             #    ball = gmsh.model.occ.addSphere(startPoint[0],startPoint[1],startPoint[2],startingRadius*1.01)
             #    newtrunks.append((3,ball))
         volumes=gmsh.model.occ.getEntities(dim=3)
-        gmsh.model.occ.fuse(newtrunks,volumes,removeObject= True, removeTool= True)
-        #gmsh.model.occ.fuse([(3,trunk)], newtrunks,removeObject= False, removeTool= True)
+        [volumes.remove(item) for item in badboys if item in volumes]
+        try:
+            gmsh.model.occ.fuse(test[0],volumes,removeObject= True, removeTool= True)
+        except:
+            print("gmsh.model.occ.fuse(volumes,test[0],removeObject= True, removeTool= True")
+            #gmsh.model.occ.fuse(test[0],volumes,removeObject= True, removeTool= True)
+            badboys.append(test[0][0])
         volumes=gmsh.model.occ.getEntities(dim=3)
-        print(volumes,i)
+        #gmsh.model.occ.fuse([(3,trunk)], newtrunks,removeObject= False, removeTool= True)
+        #except:
+        #volumes=oldVolumes
+        #print(f'Problem with CL {i}')
+        #print(volumes,i)
         gmsh.model.occ.synchronize()
 
-        if ((i % 1) == 0  or i==1):
+        if ((i % 40) == 0  or i==1):
             gmsh.write(f'{folder}\{name_ofile}_{i}.step')
     #cx,cy,cz=0.2816580241399551, -1.9043948378959654, -1.3874804023695808
     #dx,dy,dz=3.195877166439165,2.9768761114761113,2.5549797529430096
@@ -199,8 +224,10 @@ def create_gmsh_mesh_adding(clFileName,folder="temp",ofile="gmsh.msh",scalingfac
     #dx,dy,dz=2.2865367795282356,2.5604400762919113,2.7007688261857514# villi15
     #cx,cy,cz=0,-1.2402858552276663,-1.3034999407295926# villi16
     #dx,dy,dz=2.2,2.4,3# villi16
-    cx,cy,cz=0.2, -1.75, -1.75 # villi19
-    dx,dy,dz=2.2, 3.5, 3.5 # villi19
+    #cx,cy,cz=0.2, -1.75, -1.75 # villi19
+    #dx,dy,dz=2.2, 3.5, 3.5 # villi19
+    cx,cy,cz=8.8,2,-5.5
+    dx,dy,dz=1,1,1
     gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 20)
     gmsh.option.setNumber("Mesh.MeshSizeMin", 0.0005)
     gmsh.option.setNumber("Mesh.MeshSizeMax", 0.18)
@@ -332,8 +359,8 @@ def example_spline_extrude():
     gmsh.finalize()
 
 def main():# used for debug purpose of function in this file
-    create_gmsh_mesh_adding("vtkVilli16.vtp",folder="step",ofile='villi16.msh',scalingfactor=1)
-    #create_gmsh_mesh_carving("vtkVilli10Trunc.vtp")
+    create_gmsh_mesh_adding("sub_cube28.vtp",folder="step",ofile='sub_cube28.msh',scalingfactor=1)
+    #create_gmsh_mesh_carving("sub_cube.vtp")
     #create_gmsh_mesh_carving("vtkVilli15.vtp",'villi15.msh')
     #boolean_example()
     #example_spline_extrude()
