@@ -152,6 +152,7 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
         - l0 root lenght
         - alpha  asymmetry factor
     Branching is fixed or based on "1 G. Hichem and J. Malek, in 2012 6th International Conference on Sciences of Electronics, Technologies of Information and Telecommunications (SETIT), IEEE, Sousse, Tunisia, 2012, pp. 287–292."
+    Fixed portion is based somehow on "M. Lin et al. / Journal of Theoretical Biology 408 (2016) 1–12"
     '''
     params=dict.fromkeys(('d1','l1','th1','ph1','d2','l2','th2','ph2'))
     coin=random.random()
@@ -169,13 +170,13 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
         alpha=alpha
         gamma1=0.89#1/(1+alpha**3)**(1/3)
         gamma2=0.89#alpha/(1+alpha**3)**(1/3)
-        lambda1=0.85#gamma1
-        lambda2=0.85#gamma2
+        lambda1=0.975#gamma1
+        lambda2=0.975#gamma2
     else:
         gamma1=1/(1+alpha**3)**(1/3)
         gamma2=alpha/(1+alpha**3)**(1/3)
-        lambda1=0.9
-        lambda2=0.9
+        lambda1=0.975
+        lambda2=0.975
     th1=((1+alpha**3)**(4/3)+1-alpha**4)/(2*(1+alpha**3)**(2/3))
     th2=((1+alpha**3)**(4/3)+alpha**4-1)/(2*alpha**2*(1+alpha**3)**(2/3))    ##1 G. Hichem and J. Malek, in 2012 6th International Conference on Sciences of Electronics, Technologies of Information and Telecommunications (SETIT), IEEE, Sousse, Tunisia, 2012, pp. 287–292.
 
@@ -198,7 +199,7 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
     return params
 
 def vesselKindEvaluation(diam):
-    if diam<1/30:
+    if diam<1/38:
         vessKind='E'
     elif diam<1/15:
         vessKind='C'

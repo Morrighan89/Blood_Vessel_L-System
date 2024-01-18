@@ -58,6 +58,9 @@ def translate_points(points):
 
 
 def transform_points(points,grid_size,epsilon):
+    """
+    Takes a cloud of points with coordinates in space, the numbero of blocks of the grid and a tolerance. Finds the extremes of the domain plus the tolerance and deformate the space to fit the points in a [0,0,0] [grid_size] space. In this way it is easy to assign each point to a cube in the grid taking its integer part.
+    """
     min_coords = np.min(points, axis=0)-epsilon
     max_coords = np.max(points, axis=0)+epsilon
     domain_size=max_coords-min_coords
@@ -70,33 +73,40 @@ def transform_points(points,grid_size,epsilon):
 
 
 def create_3d_grid(grid_size, points):
+    """
+    allocates the grid according to the specified size and assign to each grid element the number of points in the grid accoridng to the indexing funtion
+    """
+
     grid = np.zeros(grid_size, dtype=int)
 
     for point in points:
         x, y, z = point
-        grid_x, grid_y, grid_z = int(math.ceil(x)-1), int(math.ceil(y)-1), int(math.ceil(z)-1)
+        grid_x, grid_y, grid_z = my_get_indices(x,y,z)
         grid[grid_x, grid_y, grid_z] += 1
 
     return grid
 
 def points_data_in_3d_grid(grid_size, points,data):
     grid = np.empty(grid_size, dtype=object)
-    for i in range(grid_size[0]):
+    for k in range(grid_size[2]):
         for j in range(grid_size[1]):
-            for k in range(grid_size[2]):
+            for i in range(grid_size[0]):
                 grid[i, j, k] = []
     for point,value in zip(points,data):
         x, y, z = point
-        grid_x, grid_y, grid_z = int(math.ceil(x)-1), int(math.ceil(y)-1), int(math.ceil(z)-1)
+        grid_x, grid_y, grid_z = my_get_indices(x,y,z)
         grid[grid_x, grid_y, grid_z].append(value)
     return grid
 
 def lines_in_3d_grid(grid_size,domain_size, points,lines):
+    """
+    generate the list of segments contained in each grid elements and assign also a percentage depending on how much of that segment is contained in the grid element.
+    """
     grid = np.empty(grid_size, dtype=object)
     percentage=np.empty(grid_size, dtype=object)
-    for i in range(grid_size[0]):
+    for k in range(grid_size[2]):
         for j in range(grid_size[1]):
-            for k in range(grid_size[2]):
+            for i in range(grid_size[0]):
                 grid[i, j, k] = []
                 percentage[i, j, k] = []
     for cell_id in range(lines.GetNumberOfCells()):
@@ -113,9 +123,9 @@ def lines_in_3d_grid(grid_size,domain_size, points,lines):
             #grid[grid_x2, grid_y2, grid_z2].append(cell_id)
             distance=pairwise_distances_numpy(np.array([x1, y1, z1]),np.array([x2, y2, z2]))
             direction=np.array([x1, y1, z1])-np.array([x2, y2, z2])
-            for i in range(min(grid_x1,grid_x2),max(grid_x1,grid_x2)+1):
+            for k in range(min(grid_z1,grid_z2),max(grid_z1,grid_z2)+1):
                 for j in range(min(grid_y1,grid_y2),max(grid_y1,grid_y2)+1):
-                    for k in range(min(grid_z1,grid_z2),max(grid_z1,grid_z2)+1):
+                    for i in range(min(grid_x1,grid_x2),max(grid_x1,grid_x2)+1):
                         intersection1,intersection2=intersect_segment_cube([x1, y1, z1],[x2, y2, z2],[i+0.5, j+0.5, k+0.5],[0.5,0.5,0.5])
                         distance_intersections=pairwise_distances_numpy(intersection1,intersection2)
                         grid[i,j,k].append(cell_id)
@@ -129,9 +139,15 @@ def lines_in_3d_grid(grid_size,domain_size, points,lines):
 
     return grid, percentage
 def my_get_points(points,cell,id):
+    """
+    Return the x,y,z coordinates from the points list given a cell element and the point id in the element.
+    """
     x,y,z=points[cell.GetPointId(id)][0],points[cell.GetPointId(id)][1],points[cell.GetPointId(id)][2]
     return x,y,z
 def my_get_indices(x, y, z):
+    """
+    Return the  indices on a grid of a set of points with coordinates x,y,z returning the integer part of the coordinate.
+    """
     grid_x, grid_y, grid_z = int(math.ceil(x)-1), int(math.ceil(y)-1), int(math.ceil(z)-1)
     return grid_x, grid_y, grid_z
 def intersect_segment_cube(p1, p2, cube_center, cube_half_size):
@@ -246,16 +262,16 @@ def break_polyline_to_lines(polyline,attribute_name=""):
     return lines_polydata
 
 
-def export_vtk_structured_grid(grid,attributes,domain_size,min_coords, counts, output_file):
+def export_vtk_structured_grid(grid,attributes,attributes_names,domain_size,min_coords, counts, output_file):
     # Create a VTK StructuredGrid
     structured_grid = vtk.vtkStructuredGrid()
     structured_grid.SetDimensions((grid.shape[0]+1,grid.shape[1]+1,grid.shape[2]+1))
 
     # Create vtkPoints and add them to the structured grid
     points = vtk.vtkPoints()
-    for i in range(grid.shape[0]+1):
+    for k in range(grid.shape[2]+1):
         for j in range(grid.shape[1]+1):
-            for k in range(grid.shape[2]+1):
+            for i in range(grid.shape[0]+1):
                 
                 points.InsertNextPoint(i/grid.shape[0]*domain_size[0]+min_coords[0], j/grid.shape[1]*domain_size[1]+min_coords[1], k/grid.shape[2]*domain_size[2]+min_coords[2])
 
@@ -264,14 +280,14 @@ def export_vtk_structured_grid(grid,attributes,domain_size,min_coords, counts, o
     # Convert counts to 32-bit signed integers
     counts_int = counts.astype(np.int32)
     
-    flat_grid=np.ravel(grid)
+    flat_grid=np.ravel(grid,order='F')
     VTK_data1 = dsa.numpyTovtkDataArray(flat_grid,'PointCount')
     structured_grid.GetCellData().AddArray(VTK_data1)
-    
-    flat_grid=np.ravel(attributes)
-    VTK_data = dsa.numpyTovtkDataArray(flat_grid,'Porosities')
-    structured_grid.GetCellData().AddArray(VTK_data)
-    # Create vtkCellData and add the corunt as a numeric attribute
+    for attribute,name in zip(attributes,attributes_names):
+        flat_grid=np.ravel(attribute,order='F')
+        VTK_data = dsa.numpyTovtkDataArray(flat_grid,name)
+        structured_grid.GetCellData().AddArray(VTK_data)
+ #  Create vtkCellData and add the count as a numeric attribute
  #   cell_data = vtk.vtkCellData()
  #   count_array = vtk.vtkIntArray()
  #   count_array.SetName('PointCount')
@@ -289,18 +305,30 @@ def export_vtk_structured_grid(grid,attributes,domain_size,min_coords, counts, o
     writer.SetFileName(output_file)
     writer.SetInputData(structured_grid)
     writer.Write()
-def compute_hydraulic_conductivity(lines_polidata,grid_lines,percentages,grid_size,domain_size,scale_factor):
+def compute_permeability(lines_polidata,grid_lines,percentages,grid_size,domain_size,scale_factor):
     """
-    compute the tissue hydraulic onductivity for the darcy equation using the kozeny carmann formula and tissue density of the villous space
+    compute the tissue permeability for the darcy equation using the kozeny carmann formula and tissue density of the villous space
+    Permeability k is a property of the bed, hydraulic conductivity K depends also on the fluid its moving trough the bed. K=(k rho g)/mu
+     Parameters:
+    - lines_polidata: vtk polidata containing segments of the ramified structure.
+    - grid_lines: list of line indices crossing in each grid cube.
+    - percentages: % of each line contained in the grid element.
+    - grid_size: [nx,ny,nz] number of grid elements in the three directions
+    - domain_size: [DX, DY, DZ] actual size of the volume.
+    - scale_factor: 1. At the moment I do not remember what I was planning to do with this.
+    Returns:
+    - porosities,permeabilities,avg_diameters. It returns 3 grids of size [nx,ny,nz] contianin respectively the porosity, permeability and avg diameter of the contained vessel of the grid element.
     """
     point_data = lines_polidata.GetPointData()
     attribute_array = point_data.GetArray("MaximumInscribedSphereRadius")
     attribute_np_array=vtk.util.numpy_support.vtk_to_numpy(attribute_array)
     grid_volume=np.prod(domain_size/grid_size)
     porosities= np.ones(grid_size, dtype=float)
-    for i in range(grid_size[0]):
+    permeabilities=np.empty(grid_size,dtype=float)
+    avg_diameters=np.empty(grid_size,dtype=float)
+    for k in range(grid_size[2]):
         for j in range(grid_size[1]):
-            for k in range(grid_size[2]):
+            for i in range(grid_size[0]):
                 if grid_lines[i][j][k]:
                     p0s_id=[]
                     p1s_id=[]
@@ -327,14 +355,25 @@ def compute_hydraulic_conductivity(lines_polidata,grid_lines,percentages,grid_si
                     distances=pairwise_distances_numpy(p0s_np,p1s_np)
                     volumes=compute_volumes(r0s_np,r1s_np,distances)
                     occupied_volume=np.dot(volumes,np.array(element_percentages)) #the weighted sum is obtained as the dot product between the qty array and the weights array
+                    weight_distance=distances*element_percentages
+                    avg_diameter=np.average(r0s_np+r1s_np,weights= weight_distance)
                     porosity=1-(occupied_volume/grid_volume)
+                    avg_diameters[i,j,k]=avg_diameter
                     if porosity<0:
                         porosities[i,j,k]=0
+                        permeabilities[i,j,k]=0
                     else:
                         porosities[i,j,k]=porosity
+                        permeabilities[i,j,k]=avg_diameter**2*porosity**3/(180*(1-porosity)**2)
+                    
+                   
+                    #print(permeabilities[i,j,k])
+                else:
+                    permeabilities[i,j,k]=999999999
+                    
                     #print("fatto?")
     print("finito!")          
-    return porosities
+    return porosities,permeabilities,avg_diameters
                     
 
 
@@ -460,9 +499,10 @@ def select_cube_lines_and_points(indices,lines_polydata,lines_in_grid,fname='sub
     #return
 
 def main():
-    grid_size = (15, 15, 15)
+    grid_size = (10, 9, 7)
     vtp_file_folder = './'
-    vtp_ifile_name='vtkVilli29trunc.vtp'
+    vtp_ifile_ID=33
+    vtp_ifile_name=f'vtkVilli{vtp_ifile_ID}trunc_clip.vtp'
     vtp_ifile_path=os.path.join(vtp_file_folder,vtp_ifile_name)
     vtp_ofile_path=os.path.join(vtp_file_folder,f'{os.path.splitext(vtp_ifile_name)[0]}_ls.vtp')
     attribute_name = "MaximumInscribedSphereRadius"
@@ -476,27 +516,28 @@ def main():
 
     # Create the 3D grid and count points in each grid element
     grid = create_3d_grid(grid_size, translated_points)
-    radius_to_grid=points_data_in_3d_grid(grid_size, translated_points,attribute_array)
+    #radius_to_grid=points_data_in_3d_grid(grid_size, translated_points,attribute_array)
     lines_polydata=break_polyline_to_lines(polydata,attribute_name)
 
     WritePolyData(lines_polydata,vtp_ofile_path)
     lines_in_grid,percentages=lines_in_3d_grid(grid_size,domain_size,translated_points,lines_polydata)
-    porosities=compute_hydraulic_conductivity(lines_polydata,lines_in_grid,percentages,grid_size,domain_size,1)
-    indices=np.unravel_index(np.argmax(grid, axis=None), grid.shape)
-    select_cube_lines_and_points(indices,lines_polydata,lines_in_grid,'sub_cube29.vtp')
-    CreateVoronoiDiagram("sub_cube29.vtp",32,'vor_diag_sub_cube_29.vtp')
+    porosities,permeabilities,diameters=compute_permeability(lines_polydata,lines_in_grid,percentages,grid_size,domain_size,1)
+    #indices=np.unravel_index(np.argmax(grid, axis=None), grid.shape)
+    #select_cube_lines_and_points(indices,lines_polydata,lines_in_grid,f'sub_cube{vtp_ifile_ID}.vtp')
+    #CreateVoronoiDiagram(f'sub_cube{vtp_ifile_ID}.vtp',32,f'vor_diag_sub_cube_{vtp_ifile_ID}.vtp')
     counts = count_points_in_grid(grid)
-
+    attributes=[porosities,permeabilities,diameters]
+    attributes_names=['Porosity (p.u.)', 'Permeability [mm^2]', 'avgDiameter [mm]']
     # Print the result
-    for i, count in enumerate(counts):
-        print(f"Grid element {i + 1}: {count} points")
+    #for i, count in enumerate(counts):
+    #    print(f"Grid element {i + 1}: {count} points")
 
     # Plot the density map
     plot_density_map(grid)
 
     # Export the grid as VTK StructuredGrid with the count as a numeric attribute
     #output_vtk_file = 'output_grid28.vts'
-    export_vtk_structured_grid(grid,porosities,domain_size,min_coords, counts,f'{os.path.splitext(vtp_ifile_name)[0]}_grid2.vts')
+    export_vtk_structured_grid(grid,attributes,attributes_names,domain_size,min_coords, counts,f'{os.path.splitext(vtp_ifile_name)[0]}_grid4.vts')
 
 if __name__ == "__main__":
     main()
