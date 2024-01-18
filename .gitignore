@@ -133,7 +133,11 @@ dmypy.json
 *.brep
 *.msh
 *.vtk
+*.vts
+*.vtp
 *.step
+*.stl
+*.geo
 endPoints*
 
 
@@ -142,3 +146,6 @@ endPoints*
 
 #saved struvture
 /villi16
+
+#documentation
+/doc
