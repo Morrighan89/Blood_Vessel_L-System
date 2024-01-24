@@ -38,6 +38,11 @@ from vtkmodules.vtkCommonDataModel import (
     vtkPolyLine,
     vtkGenericCell
 )
+from vtk_read_write import (
+    read_poly_data,
+    write_poly_data
+)
+
 
 parallelTransportNormalsArrayName = 'ParallelTransportNormals'
 radiusArrayName = 'MaximumInscribedSphereRadius'
@@ -163,8 +168,8 @@ def createPolyline(Instructions=[],initial_diameter=1, startingPos=np.array([0,0
         #velParam_vtk.SetName('VelParam') #rememebr to give an unique name
         #data.GetPointData().AddArray(velParam_vtk) 
         np.savetxt(f"endPoints{fileOut}",endPointsCoord,fmt='%10.5f', delimiter=' ', newline='  ')
-        WritePolyData(polyData,"vtk"+fileOut+".vtp",flag_ascii=1)
-        WritePolyData(polyDataTrunc,"vtk"+fileOut+"Trunc.vtp",flag_ascii=1)
+        write_poly_data(polyData,"vtk"+fileOut+".vtp",flag_ascii=1)
+        write_poly_data(polyDataTrunc,"vtk"+fileOut+"Trunc.vtp",flag_ascii=1)
         pvData=pv.PolyData(polyData)
         ## Add data in pyvista
         pvData.point_data[radiusArrayName]=np.array(diam)*0.5
@@ -173,8 +178,8 @@ def createPolyline(Instructions=[],initial_diameter=1, startingPos=np.array([0,0
         tube.save(fileOut+".vtp")
         pvData.save(fileOut+"Center.vtp")
 def visualizePair():
-    artery=ReadPolyData('vtkArtery.vtp')
-    vein=ReadPolyData('vtkVein.vtp')
+    artery=read_poly_data('vtkArtery.vtp')
+    vein=read_poly_data('vtkVein.vtp')
     tubeA = pv.PolyData(artery).tube(radius=0.01,scalars=radiusArrayName,capping=False)
     tubeB = pv.PolyData(vein).tube(radius=0.01,scalars=radiusArrayName,capping=False)
     p = pv.Plotter()
@@ -183,7 +188,7 @@ def visualizePair():
     p.show()
 
 def CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints,ofile="voronoiDiagram.vtp"):
-    baseCl=ReadPolyData(clFileName)
+    baseCl=read_poly_data(clFileName)
     VoronoiDiagram=ConvertClToVoronoi(baseCl)
     numberOfLines=baseCl.GetNumberOfCells()
     numberOfPoints=baseCl.GetNumberOfPoints()
@@ -218,7 +223,7 @@ def CreateVoronoiDiagram(clFileName,numberOfInterpolationPoints,ofile="voronoiDi
                 newRadiusArray.SetTuple1(count,newRadius)
                 count=count+1
         VoronoiDiagram=InsertNewVoronoiPoints(VoronoiDiagram,newLinePoints,newRadiusArray)
-    WritePolyData(VoronoiDiagram,ofile)
+    write_poly_data(VoronoiDiagram,ofile)
 
 def InsertNewVoronoiPoints(oldDataset,newPoints,newArray):
     numberOfDatasetPoints = oldDataset.GetNumberOfPoints()
@@ -357,7 +362,7 @@ def ComputeSpline(startValue,endValue,numberOfPoints):
 
 def cube_minus_villi():
     pl = pv.Plotter()
-    polyData=ReadPolyData('subcube_reconstructedmodel28.vtp')
+    polyData=read_poly_data('subcube_reconstructedmodel28.vtp')
     pvData=pv.PolyData(polyData)
     cube = pv.Cube((7.33,8.22,6.55),1,1,1).triangulate().subdivide(6)
     _ = pl.add_mesh(pvData, color='r')
@@ -369,7 +374,7 @@ def cube_minus_villi():
     result.save('cave_cube.vtp')
 def plane_minus_villi():
     pl = pv.Plotter()
-    polyData=ReadPolyData('subcube_reconstructedmodel28.vtp')
+    polyData=read_poly_data('subcube_reconstructedmodel28.vtp')
     pvData=pv.PolyData(polyData)
    
     plane = pv.Plane((7.43,8.2,6.56),(0.7,0.012,0.68),1,1).triangulate().subdivide(2)
@@ -464,19 +469,19 @@ def quatMul(q1,q2):
     z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
     return np.array([w, x, y, z])
 
-def ReadPolyData(filename):
-   reader = vtk.vtkXMLPolyDataReader()
-   reader.SetFileName(filename)
-   reader.Update()
-   return reader.GetOutput()
-
-def WritePolyData(input,filename,flag_ascii=0):
-   writer = vtk.vtkXMLPolyDataWriter()
-   writer.SetFileName(filename)
-   writer.SetInputData(input)
-   if flag_ascii:
-    writer.SetDataModeToAscii()
-   writer.Write()
+#def ReadPolyData(filename):
+#   reader = vtk.vtkXMLPolyDataReader()
+#   reader.SetFileName(filename)
+#   reader.Update()
+#   return reader.GetOutput()
+#
+#def WritePolyData(input,filename,flag_ascii=0):
+#   writer = vtk.vtkXMLPolyDataWriter()
+#   writer.SetFileName(filename)
+#   writer.SetInputData(input)
+#   if flag_ascii:
+#    writer.SetDataModeToAscii()
+#   writer.Write()
 
 def main():# used for debug purpose of function in this file
     #CreateVoronoiDiagram("vtkVesselTrunc.vtp",9)

@@ -29,48 +29,51 @@ import VesselInterpreter
 
 
 def main():
-
     """ Use this script file to generate your L-system """
     import turtle
-    #from Lsystem_class import Lsystem, rule, ruleOutput
+    # from Lsystem_class import Lsystem, rule, ruleOutput
     from PIL import Image
     from PIL import EpsImagePlugin
-    EpsImagePlugin.gs_windows_binary =  r'C:\Program Files\gs\gs9.55.0\bin\gswin64c'
+    EpsImagePlugin.gs_windows_binary = r'C:\Program Files\gs\gs9.55.0\bin\gswin64c'
     # The alphabet used for the L-system
     alphabet = 'ABCE'
     # Symbols used in L-system
     symbols = 'f+-*+[]'
-    structure_name='Villi'
-    version=35
-    initial_diameter=1.7
+    structure_name = 'Villi'
+    version = 39
+    initial_diameter = 1.7
 #
     """ L-system definition """
     # Rules definition
-    ruleA = [rule('fwturn', 0.01),rule('bif', 0.99)]
-    ruleB = [rule('fwturn', 0.7),rule('bif', 0.3)]
-    #ruleC = [rule('fwturn', 0.2),rule('bif', 0.5),rule('end',0.3)]
-    ruleC = [rule('fwturn', 0.3),rule('bif', 0.7)]
-    ruleE = [ rule('end', 1.0)]
+    ruleA = [rule('fwturn', 0.01), rule('bif', 0.99)]
+    ruleB = [rule('fwturn', 0.7), rule('bif', 0.3)]
+    # ruleC = [rule('fwturn', 0.2),rule('bif', 0.5),rule('end',0.3)]
+    ruleC = [rule('fwturn', 0.3), rule('bif', 0.7)]
+    ruleE = [rule('end', 1.0)]
     # Ruleset definition
-    ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC,'E': ruleE}
+    ruleset = {'A': ruleA, 'B': ruleB, 'C': ruleC, 'E': ruleE}
     # Lsystem definition (initial state, ruleset)
-    ls = Lsystem([['A',initial_diameter,2.4]], ruleset,alphabet)
+    ls = Lsystem([['A', initial_diameter, 2.4]], ruleset, alphabet)
     # generate the string of turtle instructions
     print("Generating L-System Instruction string set")
     instruction_string = ls.processGen(15)
     print("Drawing the Blood Vessel network")
-    #print("Drawing the following L-system :\n",instruction_string)
-    VesselInterpreter.createPolyline(instruction_string,initial_diameter=initial_diameter)
-    instruction_string=[['E',0,0] if instruction[0]=='A' else instruction for instruction in instruction_string ]
-    instruction_string=[['C',instruction[1],instruction[2]] if instruction[0]=='B' else instruction for instruction in instruction_string ]
-    ls = Lsystem(instruction_string, ruleset,alphabet)
+    # print("Drawing the following L-system :\n",instruction_string)
+    VesselInterpreter.createPolyline(
+        instruction_string, initial_diameter=initial_diameter, fileOut=f'{structure_name}{version}_1st_iter')
+    instruction_string = [['E', 0, 0] if instruction[0] ==
+                          'A' else instruction for instruction in instruction_string]
+    instruction_string = [['C', instruction[1], instruction[2]] if instruction[0]
+                          == 'B' else instruction for instruction in instruction_string]
+    ls = Lsystem(instruction_string, ruleset, alphabet)
     instruction_string_a = ls.processGen(20)
-    VesselInterpreter.createPolyline(instruction_string_a,initial_diameter=initial_diameter,fileOut=f'{structure_name}{version}',truncWithRoot=False)
-    #instruction_string_b = ls.processGen(10) ##this set of instruction is to generate a secondary slighty traslated vesesel network to mimic the veins.
-    #VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
+    VesselInterpreter.createPolyline(instruction_string_a, initial_diameter=initial_diameter,
+                                     fileOut=f'{structure_name}{version}', truncWithRoot=False)
+    # instruction_string_b = ls.processGen(10) ##this set of instruction is to generate a secondary slighty traslated vesesel network to mimic the veins.
+    # VesselInterpreter.createPolyline(instruction_string_b,startingPos=np.array([0,0.2,0.4]),fileOut="vein")
 
-    #VesselInterpreter.CreateVoronoiDiagram("vtkVilli9.vtp",199,ofile="voronoiDiagram9.vtp")
-    #VesselInterpreter.visualizePair()
-if __name__=='__main__':
+
+    # VesselInterpreter.CreateVoronoiDiagram("vtkVilli9.vtp",199,ofile="voronoiDiagram9.vtp")
+    # VesselInterpreter.visualizePair()
+if __name__ == '__main__':
     main()
-

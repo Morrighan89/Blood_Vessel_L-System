@@ -6,22 +6,27 @@ from mpl_toolkits.mplot3d import Axes3D
 import vtk
 from vtk.numpy_interface import dataset_adapter as dsa
 from VesselInterpreter import CreateVoronoiDiagram
+from vtk_read_write import(
+    write_poly_data,
+    read_poly_data,
+    write_structuredXML_mesh
+)
 
 
-def read_vtp_file(file_path):
-    reader = vtk.vtkXMLPolyDataReader()
-    reader.SetFileName(file_path)
-    reader.Update()
-
-    return reader.GetOutput()
-
-def WritePolyData(input,filename,flag_ascii=0):
-   writer = vtk.vtkXMLPolyDataWriter()
-   writer.SetFileName(filename)
-   writer.SetInputData(input)
-   if flag_ascii:
-    writer.SetDataModeToAscii()
-   writer.Write()
+#def read_vtp_file(file_path):
+#    reader = vtk.vtkXMLPolyDataReader()
+#    reader.SetFileName(file_path)
+#    reader.Update()
+#
+#    return reader.GetOutput()
+#
+#def WritePolyData(input,filename,flag_ascii=0):
+#   writer = vtk.vtkXMLPolyDataWriter()
+#   writer.SetFileName(filename)
+#   writer.SetInputData(input)
+#   if flag_ascii:
+#    writer.SetDataModeToAscii()
+#   writer.Write()
 
 def get_point_attribute(polydata, attribute_name):
     point_data = polydata.GetPointData()
@@ -141,6 +146,15 @@ def lines_in_3d_grid(grid_size,domain_size, points,lines):
 def my_get_points(points,cell,id):
     """
     Return the x,y,z coordinates from the points list given a cell element and the point id in the element.
+    
+    Parameters:
+    - points list[(vtk.Points)]: list of coordinates
+    - cell vtk.Cell : 
+    - id: point id of the cell
+
+    Returns:
+    x,y,z : coordinates
+
     """
     x,y,z=points[cell.GetPointId(id)][0],points[cell.GetPointId(id)][1],points[cell.GetPointId(id)][2]
     return x,y,z
@@ -301,21 +315,24 @@ def export_vtk_structured_grid(grid,attributes,attributes_names,domain_size,min_
  #   structured_grid.GetCellData().ShallowCopy(cell_data)
 
     # Write the StructuredGrid to a VTK file
-    writer = vtk.vtkXMLStructuredGridWriter()
-    writer.SetFileName(output_file)
-    writer.SetInputData(structured_grid)
-    writer.Write()
+    write_structuredXML_mesh(structured_grid,output_file)
+    #writer = vtk.vtkXMLStructuredGridWriter()
+    #writer.SetFileName(output_file)
+    #writer.SetInputData(structured_grid)
+    #writer.Write()
 def compute_permeability(lines_polidata,grid_lines,percentages,grid_size,domain_size,scale_factor):
     """
     compute the tissue permeability for the darcy equation using the kozeny carmann formula and tissue density of the villous space
     Permeability k is a property of the bed, hydraulic conductivity K depends also on the fluid its moving trough the bed. K=(k rho g)/mu
-     Parameters:
+
+    Parameters:
     - lines_polidata: vtk polidata containing segments of the ramified structure.
     - grid_lines: list of line indices crossing in each grid cube.
     - percentages: % of each line contained in the grid element.
     - grid_size: [nx,ny,nz] number of grid elements in the three directions
     - domain_size: [DX, DY, DZ] actual size of the volume.
     - scale_factor: 1. At the moment I do not remember what I was planning to do with this.
+
     Returns:
     - porosities,permeabilities,avg_diameters. It returns 3 grids of size [nx,ny,nz] contianin respectively the porosity, permeability and avg diameter of the contained vessel of the grid element.
     """
@@ -326,6 +343,7 @@ def compute_permeability(lines_polidata,grid_lines,percentages,grid_size,domain_
     porosities= np.ones(grid_size, dtype=float)
     permeabilities=np.empty(grid_size,dtype=float)
     avg_diameters=np.empty(grid_size,dtype=float)
+    surface_area_densities=np.empty(grid_size,dtype=float)
     for k in range(grid_size[2]):
         for j in range(grid_size[1]):
             for i in range(grid_size[0]):
@@ -354,7 +372,9 @@ def compute_permeability(lines_polidata,grid_lines,percentages,grid_size,domain_
                     r1s_np=np.array(r1s)
                     distances=pairwise_distances_numpy(p0s_np,p1s_np)
                     volumes=compute_volumes(r0s_np,r1s_np,distances)
+                    surfaces=compute_surface_area(r0s_np,r1s_np,distances)
                     occupied_volume=np.dot(volumes,np.array(element_percentages)) #the weighted sum is obtained as the dot product between the qty array and the weights array
+                    total_surface=np.dot(surfaces,np.array(element_percentages))
                     weight_distance=distances*element_percentages
                     avg_diameter=np.average(r0s_np+r1s_np,weights= weight_distance)
                     porosity=1-(occupied_volume/grid_volume)
@@ -362,18 +382,25 @@ def compute_permeability(lines_polidata,grid_lines,percentages,grid_size,domain_
                     if porosity<0:
                         porosities[i,j,k]=0
                         permeabilities[i,j,k]=0
+                        surface_area_densities[i,j,k]=total_surface/grid_volume
                     else:
                         porosities[i,j,k]=porosity
-                        permeabilities[i,j,k]=avg_diameter**2*porosity**3/(180*(1-porosity)**2)
+                        surface_area_densities[i,j,k]=total_surface/grid_volume
+                        permeability=avg_diameter**2*porosity**3/(180*(1-porosity)**2)
+                        if permeability>1:
+                            permeabilities[i,j,k]=1
+                        else:
+                            permeabilities[i,j,k]=permeability
+
                     
                    
                     #print(permeabilities[i,j,k])
                 else:
-                    permeabilities[i,j,k]=999999999
+                    permeabilities[i,j,k]=1
                     
                     #print("fatto?")
     print("finito!")          
-    return porosities,permeabilities,avg_diameters
+    return porosities,permeabilities,avg_diameters,surface_area_densities
                     
 
 
@@ -391,11 +418,27 @@ def compute_volumes(r0s,r1s,heights):
     - r0s: vector containing the radii of face 0.
     - r1s: vector containing the radii of face 1.
     - heights vector containing the heights of the cones.
+
     Returns:
     - volumes: vector containing the volumes.
     """
      volumes=1/3*np.pi*heights*(r0s**2+r1s**2+r0s*r1s)
      return volumes
+
+def compute_surface_area(r0s,r1s,heights):
+     """
+    Calculate volumes of 3D parallel faced truncated cones using NumPy.
+
+    Parameters:
+    - r0s: vector containing the radii of face 0.
+    - r1s: vector containing the radii of face 1.
+    - heights vector containing the heights of the cones.
+
+    Returns:
+    - areas: vector containing the lateral surface area.
+    """
+     areas=np.pi*(r0s+r1s)*np.sqrt(heights**2+(r0s+r1s)**2)
+     return areas
 
 def pairwise_distances_numpy(matrix1, matrix2):
     """
@@ -476,7 +519,7 @@ def select_cube_lines_and_points(indices,lines_polydata,lines_in_grid,fname='sub
     subcube_lines_polydata.SetPoints(subcube_points)
     subcube_lines_polydata.SetLines(subcube_lines)
     subcube_lines_polydata.GetPointData().AddArray(newRadiusArray)
-    WritePolyData(subcube_lines_polydata,fname)
+    write_poly_data(subcube_lines_polydata,fname)
     #    # Check if the cell is a line
     #    if cell.GetCellType() == vtk.VTK_LINE:
     #        # Add line as is
@@ -498,17 +541,33 @@ def select_cube_lines_and_points(indices,lines_polydata,lines_in_grid,fname='sub
     #subcube_lines_polydata.SetLines(lines)
     #return
 
-def main():
-    grid_size = (10, 9, 7)
-    vtp_file_folder = './'
-    vtp_ifile_ID=33
+def run_villi_to_grid(grid_size=(9,19,19), folder="./",id=38):
+    """ Takes a villi or a branched polyline structures with this nameing convention 'vtkVilli{id}trunc_clip.vtp', and using the input grid size divide the volume around the tree structure in a grid and computes the following quantites:
+    'Porosity (p.u.)'
+    'Permeability [mm^2]'
+    'avgDiameter [mm]'
+    'Surface_area_density [1/mm]'
+
+     Args:
+        grid_size (int,int,int): number of division in the three spatial dimension.
+        folder (string): working folder.
+        id (int): case id number.
+
+    Returns:
+        None: Save the computed quantities in a vtk.PolyLine chopping hte branches in individual segments and the computed grid  in a vtk..
+    
+
+    """
+    grid_size = grid_size
+    vtp_file_folder = folder
+    vtp_ifile_ID=id
     vtp_ifile_name=f'vtkVilli{vtp_ifile_ID}trunc_clip.vtp'
     vtp_ifile_path=os.path.join(vtp_file_folder,vtp_ifile_name)
     vtp_ofile_path=os.path.join(vtp_file_folder,f'{os.path.splitext(vtp_ifile_name)[0]}_ls.vtp')
     attribute_name = "MaximumInscribedSphereRadius"
 
     # Read points from the VTP file
-    polydata=read_vtp_file(vtp_ifile_path)
+    polydata=read_poly_data(vtp_ifile_path)
     points = get_vtp_points(polydata)
     attribute_array = get_point_attribute(polydata, attribute_name)
     # Translate points to fit within the specified volume
@@ -519,15 +578,15 @@ def main():
     #radius_to_grid=points_data_in_3d_grid(grid_size, translated_points,attribute_array)
     lines_polydata=break_polyline_to_lines(polydata,attribute_name)
 
-    WritePolyData(lines_polydata,vtp_ofile_path)
+    write_poly_data(lines_polydata,vtp_ofile_path)
     lines_in_grid,percentages=lines_in_3d_grid(grid_size,domain_size,translated_points,lines_polydata)
-    porosities,permeabilities,diameters=compute_permeability(lines_polydata,lines_in_grid,percentages,grid_size,domain_size,1)
+    porosities,permeabilities,diameters,surface_area_densitites=compute_permeability(lines_polydata,lines_in_grid,percentages,grid_size,domain_size,1)
     #indices=np.unravel_index(np.argmax(grid, axis=None), grid.shape)
     #select_cube_lines_and_points(indices,lines_polydata,lines_in_grid,f'sub_cube{vtp_ifile_ID}.vtp')
     #CreateVoronoiDiagram(f'sub_cube{vtp_ifile_ID}.vtp',32,f'vor_diag_sub_cube_{vtp_ifile_ID}.vtp')
     counts = count_points_in_grid(grid)
-    attributes=[porosities,permeabilities,diameters]
-    attributes_names=['Porosity (p.u.)', 'Permeability [mm^2]', 'avgDiameter [mm]']
+    attributes=[porosities,permeabilities,diameters,surface_area_densitites]
+    attributes_names=['Porosity (p.u.)', 'Permeability [mm^2]', 'avgDiameter [mm]', 'Surface_area_density [1/mm]']
     # Print the result
     #for i, count in enumerate(counts):
     #    print(f"Grid element {i + 1}: {count} points")
@@ -536,8 +595,11 @@ def main():
     plot_density_map(grid)
 
     # Export the grid as VTK StructuredGrid with the count as a numeric attribute
-    #output_vtk_file = 'output_grid28.vts'
-    export_vtk_structured_grid(grid,attributes,attributes_names,domain_size,min_coords, counts,f'{os.path.splitext(vtp_ifile_name)[0]}_grid4.vts')
+    output_vts_file = os.path.join(vtp_file_folder,f'{os.path.splitext(vtp_ifile_name)[0]}_grid4.vts')
+    export_vtk_structured_grid(grid,attributes,attributes_names,domain_size,min_coords, counts, output_vts_file)
+
+def main():
+    run_villi_to_grid()
 
 if __name__ == "__main__":
     main()

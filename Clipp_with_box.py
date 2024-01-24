@@ -1,27 +1,30 @@
 import vtk
+from vtk_read_write import (
+   read_poly_data,
+   write_poly_data
+)
+
+#def read_vtp_file(file_path):
+#    reader = vtk.vtkXMLPolyDataReader()
+#    reader.SetFileName(file_path)
+#    reader.Update()
+#
+#    return reader.GetOutput()
+#
+#
+#def WritePolyData(input, filename, flag_ascii=0):
+#   writer = vtk.vtkXMLPolyDataWriter()
+#   writer.SetFileName(filename)
+#   writer.SetInputData(input)
+#   if flag_ascii:
+#    writer.SetDataModeToAscii()
+#   writer.Write()
 
 
-
-def read_vtp_file(file_path):
-    reader = vtk.vtkXMLPolyDataReader()
-    reader.SetFileName(file_path)
-    reader.Update()
-
-    return reader.GetOutput()
-
-def WritePolyData(input,filename,flag_ascii=0):
-   writer = vtk.vtkXMLPolyDataWriter()
-   writer.SetFileName(filename)
-   writer.SetInputData(input)
-   if flag_ascii:
-    writer.SetDataModeToAscii()
-   writer.Write()
-
-
-def clip_polyline_with_box(polyData):
+def clip_polyline_with_box(polyData,bounds=(0, 20, -18, 18, -18, 18)):
     # Create a box volume
     box = vtk.vtkBox()
-    box.SetBounds(0, 20, -20, 20, -20, 20)
+    box.SetBounds(bounds)
 
     # Clip the Polyline with the box
     clipper = vtk.vtkClipPolyData()
@@ -33,14 +36,14 @@ def clip_polyline_with_box(polyData):
     return clipper.GetOutput()
 
 
-
 def main():
     # Create and clip the polyline
-    polyline = read_vtp_file('vtkVilli34Trunc.vtp')
+    polyline = read_poly_data('vtkVilli38Trunc.vtp')
     clipped_polyline = clip_polyline_with_box(polyline)
 
     # Save the clipped PolyData to a file
-    WritePolyData(clipped_polyline, 'vtkVilli34Trunc_clip.vtp')
+    write_poly_data(clipped_polyline, 'vtkVilli38Trunc_clip.vtp',flag_ascii=1)
+
 
 if __name__ == "__main__":
-    main()   
+    main()

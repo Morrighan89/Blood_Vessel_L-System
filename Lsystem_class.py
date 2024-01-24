@@ -76,13 +76,13 @@ class rule:
             return writeBifurcation(node)
         elif self.ruleType == 'fwturn':
             if random.random()<0.5:
-                rulevalues.append(['*',random.uniform(0,np.pi*3/16)])
+                rulevalues.append(['*',random.uniform(0,np.pi*4/16)])
             else:
-                rulevalues.append(['/',random.uniform(0,np.pi*3/16)])
+                rulevalues.append(['/',random.uniform(0,np.pi*4/16)])
             if random.random()<0.5:
-                rulevalues.append(['+',random.uniform(0,np.pi*3/16)])
+                rulevalues.append(['+',random.uniform(0,np.pi*4/16)])
             else:
-                rulevalues.append(['-',random.uniform(0,np.pi*3/16)])
+                rulevalues.append(['-',random.uniform(0,np.pi*4/16)])
             rulevalues.append(['f',node.diam,node.len])
             rulevalues.append([node.vessKind,node.diam,node.len])
         elif self.ruleType == 'end':
@@ -175,8 +175,8 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
     else:
         gamma1=1/(1+alpha**3)**(1/3)
         gamma2=alpha/(1+alpha**3)**(1/3)
-        lambda1=0.975
-        lambda2=0.975
+        lambda1=0.9775
+        lambda2=0.9775
     th1=((1+alpha**3)**(4/3)+1-alpha**4)/(2*(1+alpha**3)**(2/3))
     th2=((1+alpha**3)**(4/3)+alpha**4-1)/(2*alpha**2*(1+alpha**3)**(2/3))    ##1 G. Hichem and J. Malek, in 2012 6th International Conference on Sciences of Electronics, Technologies of Information and Telecommunications (SETIT), IEEE, Sousse, Tunisia, 2012, pp. 287–292.
 
@@ -199,7 +199,7 @@ def calculateBifurcation(kind,d0,l0,alpha=1):
     return params
 
 def vesselKindEvaluation(diam):
-    if diam<1/38:
+    if diam<1/40:
         vessKind='E'
     elif diam<1/15:
         vessKind='C'
