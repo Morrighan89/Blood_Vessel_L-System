@@ -29,6 +29,13 @@ def read_structuredXML_mesh(file_path):
     reader.Update()
     return reader.GetOutput()
 
+def read_fluent_data(file_path):
+    """Read a Fluent .case file. (Unstructured mesh with polyhedra and hexahedra) """
+    reader = vtk.vtkEnSightGoldBinaryReader()
+    reader.SetCaseFileName(file_path)
+    reader.Update()
+    return reader.GetOutput()
+
 def write_unstructuredXML_mesh(mesh, file_path):
     """Write a .vtu UnstructuredXML mesh vtk file. This can be a tethrahedral mesh i.e.""" 
     writer = vtk.vtkXMLUnstructuredGridWriter()
