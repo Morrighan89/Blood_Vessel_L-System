@@ -51,7 +51,7 @@ def generate_finer_structured_grid_manual(input_grid, refinement_factor):
     # Get dimensions of the input grid
     dims = input_grid.GetDimensions()
     sizes = input_grid.GetBounds()
-    refined_dims = [dim * refinement_factor for dim in dims]
+    refined_dims = [round(dim * refinement_factor) for dim in dims]
 
     # Set the dimensions of the finer grid
     finer_grid.SetDimensions(refined_dims)
@@ -145,7 +145,7 @@ def interpolate_gridded_data(existing_mesh, structured_mesh):
 def visualize_mesh(mesh, scalar_name='permeability'):
     mapper = vtk.vtkDataSetMapper()
     mapper.SetInputData(mesh)
-    mapper.SetScalarModeToUsePointData()
+    mapper.SetScalarModeToUseCellData()
     mapper.SelectColorArray(scalar_name)
     
     actor = vtk.vtkActor()
@@ -252,8 +252,32 @@ def from_grid_to_mesh(id=38,folder='./',ref_factor=10):
 
     write_unstructuredXML_mesh(interpolated_mesh, os.path.join(folder,f'{os.path.splitext(existing_mesh_fname)[0]}_inter.vtu') ) # Change the filename as needed
 
+def interpolate_grid_mesh(structured_mesh_fname,id=38,folder='./',ref_factor=10.0):
+    
+    structured_mesh_path=os.path.join(folder,structured_mesh_fname)
+    # Set the refinement factor (e.g., doubling the resolution)
+    refinement_factor = ref_factor
+
+    # Load existing mesh and structured mesh
+    
+    structured_mesh = read_structuredXML_mesh(structured_mesh_path)
+    #structured_mesh = read_structured_mesh(structured_mesh_path)
+
+    
+
+    # Generate a finer structured grid
+    finer_grid = generate_finer_structured_grid_manual(structured_mesh, refinement_factor)
+
+
+    interpolate_data(finer_grid, structured_mesh)
+
+    write_structuredXML_mesh(finer_grid,os.path.join(folder,f'{os.path.splitext(structured_mesh_fname)[0]}_inter.vts') )
+
+
+
 def main():
-    from_grid_to_mesh(id=38)
+    from_grid_to_mesh(id=39,folder='./case_39')
+
 
 if __name__ == "__main__":
     main()

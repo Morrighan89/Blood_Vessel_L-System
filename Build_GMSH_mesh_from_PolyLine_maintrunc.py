@@ -28,6 +28,28 @@ from vtk_read_write import (
 )
 
 def create_gmsh_mesh_carving(clFileName,folder="temp",ofile="gmsh.msh",cx=0.0,cy=-18.0,cz=-18.0,dx=20.0,dy=36.0,dz=36.0,scalingfactor=1.0,brep_module=100):
+    """
+    Generate the mesh of a portion of the Inter villous space, carving inside a box volume the villi structure.
+    Can also be used to genertate the air volume around tree barnches and so on. Writes the output mesh and the intermediate brep structure 
+
+    Args:
+        clFileName (_type_): _description_ Input villi centerline to carve from the box
+        folder (str, optional): _description_. Defaults to "temp".
+        ofile (str, optional): _description_. Defaults to "gmsh.msh".
+        cx (float, optional): _description_. Defaults to 0.0. Box lower corner coord x
+        cy (float, optional): _description_. Defaults to -18.0. Box lower corner coord y
+        cz (float, optional): _description_. Defaults to -18.0. Box lower corner coord z
+        dx (float, optional): _description_. Defaults to 20.0. Box side lenght in x
+        dy (float, optional): _description_. Defaults to 36.0. Box side lenght in y
+        dz (float, optional): _description_. Defaults to 36.0. Box side lenght in z
+        scalingfactor (float, optional): _description_. Defaults to 1.0.
+        brep_module (int, optional): _description_. Defaults to 100. How frequently save the brep structure.
+
+    Return:
+        None
+    """ 
+
+    
     baseCl=read_poly_data(os.path.join(folder,clFileName))
     temp = os.path.splitext(ofile)
     var = (os.path.basename(temp[0]), temp[1])
@@ -132,9 +154,9 @@ def create_gmsh_mesh_carving(clFileName,folder="temp",ofile="gmsh.msh",cx=0.0,cy
         try:
         #volumes=gmsh.model.occ.getEntities(dim=3) 
             #for j in range(0,linePtsNumber-1): #linePtsNumber-1
-            endpoint=line.GetPoint(6)
+            endpoint=line.GetPoint(8)
             if endpoint not in endpoints:
-                for j in range(0,7): #linePtsNumber-1
+                for j in range(0,9): #linePtsNumber-1
                     startPoint=line.GetPoint(j)
                     startingRadius=line.GetPointData().GetArray(radiusArrayName).GetTuple1(j)
                     endingRadius=line.GetPointData().GetArray(radiusArrayName).GetTuple1(j+1)
