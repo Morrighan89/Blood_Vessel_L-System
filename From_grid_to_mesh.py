@@ -139,8 +139,13 @@ def interpolate_gridded_data(existing_mesh, structured_mesh):
     probe_filter.SetInputData(existing_mesh)
     probe_filter.SetSourceData(structured_mesh)
     probe_filter.PassCellArraysOn ()
+    probe_filter.AddObserver("ProgressEvent", progress_callback)
     probe_filter.Update()
     return probe_filter.GetOutput()
+
+def progress_callback(caller, event):
+    progress = caller.GetProgress() * 100
+    print(f"Progress: {progress:.1f}%")
 
 def visualize_mesh(mesh, scalar_name='permeability'):
     mapper = vtk.vtkDataSetMapper()
